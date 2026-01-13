@@ -117,23 +117,43 @@ AIが自動的に以下を実行：
 
 ### 拡張機能
 
-Commandaはプラグインアーキテクチャを採用しており、拡張機能を追加できます。
+CommandaはMEF (Managed Extensibility Framework) を使用したプラグインアーキテクチャを採用しており、拡張機能を動的にロードできます。拡張機能はNuGetパッケージとして配布され、インストール時に自動的に有効化されます。
 
 #### 拡張機能のインストール
-1. 設定 → 拡張機能 → 参照
-2. インストールしたい拡張を選択
-3. ダウンロードして有効化
+1. NuGetから拡張パッケージをインストール
+2. アプリケーション再起動
+3. 拡張機能が自動的にロード
 
 #### カスタム拡張開発
+拡張機能はMEF Exportとして実装します。
+
 ```csharp
-[McpServerToolType]
-public static class CustomOperations
+[Export(typeof(IMcpExtension))]
+public class MyExtension : IMcpExtension
 {
-    [McpServerTool, Description("カスタム操作を実行")]
-    public static string CustomAction(string parameter)
+    public string Name => "My Custom Extension";
+    public string Version => "1.0.0";
+
+    public IEnumerable<McpServerToolType> ToolTypes => new[]
     {
-        // カスタムロジックを実装
-        return $"カスタム操作完了: {parameter}";
+        typeof(MyTools)
+    };
+
+    public Task InitializeAsync(IServiceProvider services)
+    {
+        // 初期化処理
+        return Task.CompletedTask;
+    }
+}
+
+[McpServerToolType]
+public static class MyTools
+{
+    [McpServerTool, Description("カスタムツールの説明")]
+    public static string MyTool(string parameter)
+    {
+        // ツール実装
+        return $"Result: {parameter}";
     }
 }
 ```
