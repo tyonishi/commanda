@@ -2,6 +2,8 @@ using System.Windows;
 using Commanda.Core;
 using Commanda.Extensions;
 using Commanda.Mcp;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
 namespace Commanda;
 
@@ -10,20 +12,45 @@ namespace Commanda;
 /// </summary>
 public partial class App : Application
 {
-    protected override void OnStartup(StartupEventArgs e)
+    private IHost? _host;
+
+    protected override async void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
 
-        // 簡易的な依存性注入
-        var extensionManager = new ExtensionManager();
-        var mcpServer = new McpServer(extensionManager);
-        var llmManager = new LlmProviderManager();
-        var agentOrchestrator = new AgentOrchestrator(llmManager, mcpServer);
+        _host = Host.CreateDefaultBuilder()
+            .ConfigureServices((context, services) =>
+            {
+                // Core services
+                services.AddSingleton<ILlmProviderManager, LlmProviderManager>();
+                services.AddSingleton<IMcpServer, McpServer>();
+                services.AddSingleton<IAgentOrchestrator, AgentOrchestrator>();
+
+                // Extensions
+                services.AddSingleton<IExtensionManager, ExtensionManager>();
+
+                // WPF services
+                services.AddTransient<MainViewModel>();
+            })
+            .Build();
+
+        await _host.StartAsync();
 
         // MainWindowの作成と表示
         var mainWindow = new MainWindow();
-        var viewModel = new MainViewModel(agentOrchestrator);
-        mainWindow.DataContext = viewModel;
+        var mainViewModel = _host.Services.GetRequiredService<MainViewModel>();
+        mainWindow.DataContext = mainViewModel;
         mainWindow.Show();
+    }
+
+    protected override async void OnExit(ExitEventArgs e)
+    {
+        if (_host != null)
+        {
+            await _host.StopAsync();
+            _host.Dispose();
+        }
+
+        base.OnExit(e);
     }
 }
