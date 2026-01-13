@@ -164,3 +164,44 @@ public class AgentContext
             .ToList();
     }
 }
+
+/// <summary>
+/// 実行ログを表すクラス
+/// </summary>
+public class ExecutionLog
+{
+    public int Id { get; set; }
+    public DateTime Timestamp { get; set; }
+    public string TaskDescription { get; set; } = string.Empty;
+    public string Status { get; set; } = string.Empty;
+    public string? Result { get; set; }
+    public TimeSpan Duration { get; set; }
+    public int StepsExecuted { get; set; }
+    public string? ErrorMessage { get; set; }
+}
+
+/// <summary>
+/// タスク履歴を表すクラス
+/// </summary>
+public class TaskHistory
+{
+    public int Id { get; set; }
+    public string SessionId { get; set; } = string.Empty;
+    public string UserInput { get; set; } = string.Empty;
+    public string ExecutionPlan { get; set; } = string.Empty;
+    public string Status { get; set; } = string.Empty;
+    public string? FinalResult { get; set; }
+}
+
+/// <summary>
+/// 拡張機能情報を表すクラス
+/// </summary>
+public class ExtensionInfo
+{
+    public int Id { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public string Version { get; set; } = string.Empty;
+    public string AssemblyPath { get; set; } = string.Empty;
+    public bool IsEnabled { get; set; } = true;
+    public DateTime InstalledAt { get; set; }
+}

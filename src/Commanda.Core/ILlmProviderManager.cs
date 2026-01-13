@@ -102,6 +102,11 @@ public enum ResponseFormat
 public class LlmProviderConfig
 {
     /// <summary>
+    /// ID
+    /// </summary>
+    public int Id { get; set; }
+
+    /// <summary>
     /// プロバイダー名
     /// </summary>
     public string Name { get; set; } = string.Empty;

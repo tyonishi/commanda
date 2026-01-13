@@ -1,12 +1,12 @@
-<Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+﻿<Project Sdk="Microsoft.NET.Sdk">
+   <PropertyGroup>
+    <TargetFramework>net8.0-windows</TargetFramework>
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
      <ImplicitUsings>enable</ImplicitUsings>
      <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
      <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
-  </PropertyGroup>
+   </PropertyGroup>
 
     <ItemGroup>
 
