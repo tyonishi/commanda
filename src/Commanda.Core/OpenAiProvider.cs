@@ -11,16 +11,18 @@ public class OpenAiProvider : ILlmProvider
 {
     private readonly HttpClient _httpClient;
     private readonly LlmProviderConfig _config;
+    private readonly SecureStorage _secureStorage;
 
     /// <summary>
     /// コンストラクタ
     /// </summary>
     /// <param name="config">プロバイダー設定</param>
-    public OpenAiProvider(LlmProviderConfig config)
+    /// <param name="secureStorage">安全なストレージ</param>
+    public OpenAiProvider(LlmProviderConfig config, SecureStorage secureStorage)
     {
         _config = config ?? throw new ArgumentNullException(nameof(config));
+        _secureStorage = secureStorage ?? throw new ArgumentNullException(nameof(secureStorage));
         _httpClient = new HttpClient();
-        _httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {_config.ApiKey}");
     }
 
     /// <summary>
@@ -56,6 +58,17 @@ public class OpenAiProvider : ILlmProvider
     /// <returns>レスポンス</returns>
     public async Task<string> GetResponseAsync(string prompt, ResponseFormat format = ResponseFormat.Text, CancellationToken cancellationToken = default)
     {
+        // APIキーを安全なストレージから取得
+        var apiKey = await _secureStorage.RetrieveApiKeyAsync($"{_config.Name}_ApiKey");
+        if (string.IsNullOrEmpty(apiKey))
+        {
+            throw new InvalidOperationException($"APIキーが設定されていません。プロバイダー: {_config.Name}");
+        }
+
+        // Authorizationヘッダーを設定
+        _httpClient.DefaultRequestHeaders.Remove("Authorization");
+        _httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {apiKey}");
+
         var request = new
         {
             model = _config.ModelName ?? "gpt-3.5-turbo",

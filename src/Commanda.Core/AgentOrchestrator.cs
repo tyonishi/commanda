@@ -7,6 +7,7 @@ public class AgentOrchestrator : IAgentOrchestrator
 {
     private readonly ILlmProviderManager _llmManager;
     private readonly IMcpServer _mcpServer;
+    private readonly InputValidator _inputValidator;
     private readonly CancellationTokenSource _cancellationSource;
     private AgentContext? _currentContext;
 
@@ -15,10 +16,12 @@ public class AgentOrchestrator : IAgentOrchestrator
     /// </summary>
     /// <param name="llmManager">LLMプロバイダーマネージャー</param>
     /// <param name="mcpServer">MCPサーバー</param>
-    public AgentOrchestrator(ILlmProviderManager llmManager, IMcpServer mcpServer)
+    /// <param name="inputValidator">入力検証クラス</param>
+    public AgentOrchestrator(ILlmProviderManager llmManager, IMcpServer mcpServer, InputValidator inputValidator)
     {
         _llmManager = llmManager ?? throw new ArgumentNullException(nameof(llmManager));
         _mcpServer = mcpServer ?? throw new ArgumentNullException(nameof(mcpServer));
+        _inputValidator = inputValidator ?? throw new ArgumentNullException(nameof(inputValidator));
         _cancellationSource = new CancellationTokenSource();
     }
 
@@ -34,6 +37,28 @@ public class AgentOrchestrator : IAgentOrchestrator
 
         try
         {
+            // 入力検証
+            var validationResult = _inputValidator.ValidateUserInput(userInput);
+            if (!validationResult.IsValid)
+            {
+                return new ExecutionResult
+                {
+                    Content = $"入力検証エラー: {validationResult.ErrorMessage}",
+                    IsSuccessful = false,
+                    Duration = DateTime.UtcNow - startTime
+                };
+            }
+
+            // 警告がある場合はログに記録
+            if (validationResult.Warnings.Any())
+            {
+                foreach (var warning in validationResult.Warnings)
+                {
+                    // TODO: ログに記録
+                    Console.WriteLine($"警告: {warning}");
+                }
+            }
+
             // シンプルな実装：直接LLMに問い合わせ
             var provider = await _llmManager.GetActiveProviderAsync();
 

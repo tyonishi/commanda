@@ -8,24 +8,40 @@ namespace Commanda.Core;
 public class LlmProviderManager : ILlmProviderManager
 {
     private readonly ConcurrentDictionary<string, ILlmProvider> _providers = new();
+    private readonly SecureStorage _secureStorage;
     private string? _defaultProviderName;
 
     /// <summary>
     /// コンストラクタ
     /// </summary>
-    public LlmProviderManager()
+    /// <param name="secureStorage">安全なストレージ</param>
+    public LlmProviderManager(SecureStorage secureStorage)
     {
-        // デフォルトのOpenAIプロバイダーを設定
+        _secureStorage = secureStorage ?? throw new ArgumentNullException(nameof(secureStorage));
+
+        // デフォルトのOpenAIプロバイダーを設定（APIキーはストレージから取得）
+        InitializeDefaultProviderAsync().GetAwaiter().GetResult();
+    }
+
+    /// <summary>
+    /// デフォルトプロバイダーを初期化します
+    /// </summary>
+    /// <returns>初期化処理のタスク</returns>
+    private async Task InitializeDefaultProviderAsync()
+    {
+        var apiKey = await _secureStorage.RetrieveApiKeyAsync("OpenAI_ApiKey");
+
         var defaultConfig = new LlmProviderConfig
         {
             Name = "OpenAI",
             ProviderType = "OpenAI",
             BaseUri = "https://api.openai.com/v1",
             ModelName = "gpt-3.5-turbo",
+            ApiKey = apiKey ?? string.Empty, // APIキーがない場合は空文字列
             IsDefault = true
         };
 
-        var provider = new OpenAiProvider(defaultConfig);
+        var provider = new OpenAiProvider(defaultConfig, _secureStorage);
         _providers[defaultConfig.Name] = provider;
         _defaultProviderName = defaultConfig.Name;
     }
@@ -71,16 +87,33 @@ public class LlmProviderManager : ILlmProviderManager
     /// </summary>
     /// <param name="config">プロバイダー設定</param>
     /// <returns>追加が成功したかどうか</returns>
-    public Task<bool> AddProviderAsync(LlmProviderConfig config)
+    public async Task<bool> AddProviderAsync(LlmProviderConfig config)
     {
         if (_providers.ContainsKey(config.Name))
         {
-            return Task.FromResult(false);
+            return false;
         }
+
+        // APIキーを安全に保存
+        if (!string.IsNullOrEmpty(config.ApiKey))
+        {
+            await _secureStorage.StoreApiKeyAsync($"{config.Name}_ApiKey", config.ApiKey);
+        }
+
+        // APIキーを設定から除去（メモリ上に残さない）
+        var configWithoutKey = new LlmProviderConfig
+        {
+            Name = config.Name,
+            ProviderType = config.ProviderType,
+            BaseUri = config.BaseUri,
+            ModelName = config.ModelName,
+            IsDefault = config.IsDefault,
+            ApiKey = string.Empty // メモリ上には保持しない
+        };
 
         ILlmProvider provider = config.ProviderType switch
         {
-            "OpenAI" => new OpenAiProvider(config),
+            "OpenAI" => new OpenAiProvider(configWithoutKey, _secureStorage),
             _ => throw new NotSupportedException($"プロバイダータイプ '{config.ProviderType}' はサポートされていません")
         };
 
@@ -91,7 +124,7 @@ public class LlmProviderManager : ILlmProviderManager
             _defaultProviderName = config.Name;
         }
 
-        return Task.FromResult(true);
+        return true;
     }
 
     /// <summary>
@@ -124,7 +157,7 @@ public class LlmProviderManager : ILlmProviderManager
 
             if (config.ProviderType == "OpenAI")
             {
-                provider = new OpenAiProvider(config);
+                provider = new OpenAiProvider(config, _secureStorage);
             }
             else
             {
