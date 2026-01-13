@@ -52,64 +52,15 @@
     <TestResultsOutputPath>$(MSBuildThisFileDirectory)artifacts\test-results\</TestResultsOutputPath>
   </PropertyGroup>
 
-  <!-- NuGet Package References -->
-  <ItemGroup>
-    <PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="8.0.0" PrivateAssets="all" />
-    <PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.556" PrivateAssets="all" />
-    <PackageReference Include="Roslynator.Analyzers" Version="4.12.0" PrivateAssets="all" />
-  </ItemGroup>
 
-  <!-- Source Link for debugging -->
-  <PropertyGroup>
-    <PublishRepositoryUrl>true</PublishRepositoryUrl>
-    <EmbedUntrackedSources>true</EmbedUntrackedSources>
-    <IncludeSymbols>true</IncludeSymbols>
-    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
-  </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
-  </ItemGroup>
 
-  <!-- Assembly Information -->
-  <PropertyGroup>
-    <AssemblyTitle>$(MSBuildProjectName)</AssemblyTitle>
-    <AssemblyDescription>$(Description)</AssemblyDescription>
-    <AssemblyConfiguration>$(Configuration)</AssemblyConfiguration>
-    <AssemblyCompany>$(Company)</AssemblyCompany>
-    <AssemblyProduct>$(Product)</AssemblyProduct>
-    <AssemblyCopyright>$(Copyright)</AssemblyCopyright>
-    <AssemblyVersion>1.0.0.0</AssemblyVersion>
-    <FileVersion>1.0.0.0</FileVersion>
-    <InformationalVersion>1.0.0.0</InformationalVersion>
-  </PropertyGroup>
 
-  <!-- Code Analysis Rules -->
-  <PropertyGroup>
-    <!-- Style Rules -->
-    <dotnet_diagnostic.IDE0005.severity>warning</dotnet_diagnostic.IDE0005.severity> <!-- Using directive is unnecessary -->
-    <dotnet_diagnostic.IDE0044.severity>warning</dotnet_diagnostic.IDE0044.severity> <!-- Make field readonly -->
 
-    <!-- Quality Rules -->
-    <dotnet_diagnostic.CA1062.severity>warning</dotnet_diagnostic.CA1062.severity> <!-- Validate arguments of public methods -->
-    <dotnet_diagnostic.CA1303.severity>warning</dotnet_diagnostic.CA1303.severity> <!-- Do not pass literals as localized parameters -->
-    <dotnet_diagnostic.CA1305.severity>warning</dotnet_diagnostic.CA1305.severity> <!-- Specify IFormatProvider -->
-    <dotnet_diagnostic.CA1822.severity>warning</dotnet_diagnostic.CA1822.severity> <!-- Mark members as static -->
-    <dotnet_diagnostic.CA2200.severity>warning</dotnet_diagnostic.CA2200.severity> <!-- Rethrow to preserve stack details -->
 
-    <!-- Security Rules -->
-    <dotnet_diagnostic.CA2100.severity>error</dotnet_diagnostic.CA2100.severity> <!-- Review SQL queries for security vulnerabilities -->
-    <dotnet_diagnostic.CA3001.severity>error</dotnet_diagnostic.CA3001.severity> <!-- Review code for SQL injection vulnerabilities -->
-    <dotnet_diagnostic.CA3002.severity>error</dotnet_diagnostic.CA3002.severity> <!-- Review code for XSS vulnerabilities -->
-    <dotnet_diagnostic.CA3003.severity>error</dotnet_diagnostic.CA3003.severity> <!-- Review code for file path injection vulnerabilities -->
-    <dotnet_diagnostic.CA3004.severity>error</dotnet_diagnostic.CA3004.severity> <!-- Review code for information disclosure vulnerabilities -->
-    <dotnet_diagnostic.CA3006.severity>error</dotnet_diagnostic.CA3006.severity> <!-- Review code for process command injection vulnerabilities -->
-  </PropertyGroup>
 
-  <!-- StyleCop Configuration -->
-  <PropertyGroup>
-    <CodeAnalysisRuleSet>$(MSBuildThisFileDirectory)stylecop.ruleset</CodeAnalysisRuleSet>
-  </PropertyGroup>
+
+
 
   <!-- Platform Specific -->
   <PropertyGroup Condition="'$(RuntimeIdentifier)'=='win-x64'">
