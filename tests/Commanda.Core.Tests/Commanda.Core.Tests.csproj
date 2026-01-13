@@ -18,8 +18,9 @@
        <PackageReference Include="Microsoft.Extensions.Logging" Version="10.0.0" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.0" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="8.0.0" />
-        <PackageReference Include="System.Reactive" Version="6.0.0" />
-    </ItemGroup>
+         <PackageReference Include="System.Reactive" Version="6.0.0" />
+         <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="10.0.1" />
+     </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Commanda.Core\Commanda.Core.csproj" />

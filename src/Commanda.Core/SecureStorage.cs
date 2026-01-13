@@ -2,6 +2,7 @@ using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 
+
 namespace Commanda.Core;
 
 /// <summary>
@@ -170,13 +171,10 @@ public class SecureStorage
     /// <returns>暗号化されたデータ</returns>
     private string ProtectData(string data)
     {
-        // 簡易的な暗号化実装（本番環境ではWindows Data Protection APIを使用）
+        // Windows Data Protection APIを使用した本番暗号化
         var bytes = Encoding.UTF8.GetBytes(data);
-        for (int i = 0; i < bytes.Length; i++)
-        {
-            bytes[i] = (byte)(bytes[i] ^ 0xAA); // 単純なXOR暗号化
-        }
-        return Convert.ToBase64String(bytes);
+        var encryptedBytes = ProtectedData.Protect(bytes, null, DataProtectionScope.CurrentUser);
+        return Convert.ToBase64String(encryptedBytes);
     }
 
     /// <summary>
@@ -186,13 +184,10 @@ public class SecureStorage
     /// <returns>復号化されたデータ</returns>
     private string UnprotectData(string protectedData)
     {
-        // 簡易的な復号化実装（本番環境ではWindows Data Protection APIを使用）
-        var bytes = Convert.FromBase64String(protectedData);
-        for (int i = 0; i < bytes.Length; i++)
-        {
-            bytes[i] = (byte)(bytes[i] ^ 0xAA); // 単純なXOR復号化
-        }
-        return Encoding.UTF8.GetString(bytes);
+        // Windows Data Protection APIを使用した本番復号化
+        var encryptedBytes = Convert.FromBase64String(protectedData);
+        var decryptedBytes = ProtectedData.Unprotect(encryptedBytes, null, DataProtectionScope.CurrentUser);
+        return Encoding.UTF8.GetString(decryptedBytes);
     }
 
     /// <summary>
