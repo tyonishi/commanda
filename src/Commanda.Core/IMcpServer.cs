@@ -92,5 +92,5 @@ public interface IMcpExtension
     /// </summary>
     /// <param name="services">サービスプロバイダ</param>
     /// <returns>初期化処理のタスク</returns>
-    Task InitializeAsync(IServiceProvider services);
+    Task InitializeAsync(IServiceProvider? services);
 }

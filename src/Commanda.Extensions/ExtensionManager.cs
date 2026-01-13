@@ -1,3 +1,4 @@
+using System.Reflection;
 using Commanda.Core;
 
 namespace Commanda.Extensions;
@@ -13,10 +14,70 @@ public class ExtensionManager : IExtensionManager
     /// 拡張機能をロードします
     /// </summary>
     /// <returns>ロード処理のタスク</returns>
-    public Task LoadExtensionsAsync()
+    public async Task LoadExtensionsAsync()
     {
-        // 今回は何もロードしない（将来の拡張用）
-        return Task.CompletedTask;
+        try
+        {
+            // 拡張機能ディレクトリのパスを取得
+            var extensionsPath = Path.Combine(
+                AppDomain.CurrentDomain.BaseDirectory,
+                "Extensions");
+
+            if (!Directory.Exists(extensionsPath))
+            {
+                Directory.CreateDirectory(extensionsPath);
+            }
+
+            // 拡張機能ディレクトリからDLLファイルを検索
+            var extensionFiles = Directory.GetFiles(extensionsPath, "*.dll");
+
+            foreach (var dllPath in extensionFiles)
+            {
+                try
+                {
+                    // アセンブリをロード
+                    var assembly = Assembly.LoadFrom(dllPath);
+
+                    // IMcpExtensionを実装したクラスを検索
+                    var extensionTypes = assembly.GetTypes()
+                        .Where(t => typeof(IMcpExtension).IsAssignableFrom(t) &&
+                                   !t.IsInterface &&
+                                   !t.IsAbstract);
+
+                    foreach (var extensionType in extensionTypes)
+                    {
+                        try
+                        {
+                            // 拡張機能のインスタンスを作成
+                            var instance = Activator.CreateInstance(extensionType);
+                            if (instance is IMcpExtension extension)
+                            {
+                                // 拡張機能を初期化
+                                await extension.InitializeAsync(null); // TODO: サービスプロバイダを渡す
+
+                                // リストに追加
+                                _loadedExtensions.Add(extension);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            // ログに記録して続行
+                            Console.WriteLine($"拡張機能 '{extensionType.Name}' の初期化に失敗しました: {ex.Message}");
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // ログに記録して続行
+                    Console.WriteLine($"DLL '{Path.GetFileName(dllPath)}' のロードに失敗しました: {ex.Message}");
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            // ログに記録
+            Console.WriteLine($"拡張機能のロードに失敗しました: {ex.Message}");
+        }
     }
 
     /// <summary>

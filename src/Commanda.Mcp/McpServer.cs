@@ -89,13 +89,13 @@ public class McpServer : IMcpServer
         // 組み込みツールの追加
         tools.AddRange(new[] { "read_file", "write_file", "list_directory" });
 
-        // 拡張ツールの追加（今回は空）
+        // 拡張ツールの追加
         var extensions = await _extensionManager.GetLoadedExtensionsAsync();
         foreach (var extension in extensions)
         {
             foreach (var toolType in extension.ToolTypes)
             {
-                // 簡易的なツール名取得（実際の実装ではリフレクションを使う）
+                // ツール名を生成（拡張機能名_ツールクラス名）
                 tools.Add($"extension_{extension.Name}_{toolType.Name}");
             }
         }
@@ -124,6 +124,76 @@ public class McpServer : IMcpServer
     }
 
     /// <summary>
+    /// 拡張ツールを実行します
+    /// </summary>
+    /// <param name="toolName">ツール名</param>
+    /// <param name="arguments">引数</param>
+    /// <param name="cancellationToken">キャンセレーショントークン</param>
+    /// <returns>実行結果</returns>
+    private async Task<ToolResult?> ExecuteExtensionToolAsync(string toolName, Dictionary<string, object> arguments, CancellationToken cancellationToken)
+    {
+        // ツール名から拡張機能名とツールクラス名を解析
+        if (!toolName.StartsWith("extension_"))
+        {
+            return null;
+        }
+
+        var parts = toolName.Split('_');
+        if (parts.Length < 3)
+        {
+            return null;
+        }
+
+        var extensionName = parts[1];
+        var toolClassName = string.Join("_", parts.Skip(2));
+
+        // 拡張機能を取得
+        var extensions = await _extensionManager.GetLoadedExtensionsAsync();
+        var extension = extensions.FirstOrDefault(e => e.Name == extensionName);
+        if (extension == null)
+        {
+            return null;
+        }
+
+        // ツールクラスを取得
+        var toolType = extension.ToolTypes.FirstOrDefault(t => t.Name == toolClassName);
+        if (toolType == null)
+        {
+            return null;
+        }
+
+        // ツールクラスのインスタンスを作成
+        var toolInstance = Activator.CreateInstance(toolType);
+        if (toolInstance == null)
+        {
+            return null;
+        }
+
+        try
+        {
+            // ツールのメソッドをリフレクションで実行
+            // TODO: MCPツール属性に基づいて適切なメソッドを呼び出す
+            // ここでは簡易実装として、ExecuteAsyncメソッドを呼び出す
+            var executeMethod = toolType.GetMethod("ExecuteAsync");
+            if (executeMethod != null)
+            {
+                var result = await (Task<ToolResult>)executeMethod.Invoke(toolInstance, new object[] { arguments, cancellationToken })!;
+                return result;
+            }
+
+            return null;
+        }
+        catch (Exception ex)
+        {
+            return new ToolResult
+            {
+                IsSuccessful = false,
+                Error = $"拡張ツール実行エラー: {ex.Message}"
+            };
+        }
+    }
+
+    /// <summary>
     /// 内部ツール実行メソッド
     /// </summary>
     /// <param name="toolName">ツール名</param>
@@ -145,7 +215,13 @@ public class McpServer : IMcpServer
             case "list_directory":
                 return await FileOperations.ListDirectoryAsync(arguments, token);
             default:
-                // 拡張ツールの検索（今回は未実装）
+                // 拡張ツールの実行を試行
+                var result = await ExecuteExtensionToolAsync(toolName, arguments, token);
+                if (result != null)
+                {
+                    return result;
+                }
+
                 throw new ToolNotFoundException($"ツール '{toolName}' が見つかりません");
         }
     }
