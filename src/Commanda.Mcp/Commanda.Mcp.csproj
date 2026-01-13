@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <LangVersion>latest</LangVersion>
@@ -8,12 +8,12 @@
      <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
   </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="ModelContextProtocol" Version="0.5.0-preview.1" />
+   <ItemGroup>
+     <PackageReference Include="ModelContextProtocol" Version="0.5.0-preview.1" />
     <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="10.0.0" />
     <PackageReference Include="System.Text.Json" Version="10.0.0" />
-  </ItemGroup>
+   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Commanda.Core\Commanda.Core.csproj" />

@@ -1,0 +1,10 @@
+{
+    "git.autofetch": true,
+    "git.enableSmartCommit": true,
+    "git.confirmSync": false,
+    "gitlens.advanced.messages": {
+        "suppressCommitHasNoVerificationBadge": true
+    },
+    "editor.formatOnSave": true,
+    "csharp.format.enable": true
+}

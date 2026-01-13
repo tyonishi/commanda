@@ -1,0 +1,11 @@
+version: '3.8'
+
+services:
+  commanda:
+    build: .
+    platform: windows/amd64
+    # Critical decision: WPF applications require Windows containers; not suitable for production containerization without GUI support
+    # This is for development/testing only
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    # Critical decision: Use environment variables for configuration; sensitive data should use secrets
