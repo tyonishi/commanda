@@ -1,6 +1,5 @@
-using NUnit.Framework;
 using Moq;
-using Commanda.Core;
+using NUnit.Framework;
 
 namespace Commanda.Core.Tests;
 
@@ -9,6 +8,7 @@ public class AgentOrchestratorTests
 {
     private Mock<ILlmProviderManager> _llmManagerMock = null!;
     private Mock<IMcpServer> _mcpServerMock = null!;
+    private InputValidator _inputValidator = null!;
     private AgentOrchestrator _orchestrator = null!;
 
     [SetUp]
@@ -16,7 +16,8 @@ public class AgentOrchestratorTests
     {
         _llmManagerMock = new Mock<ILlmProviderManager>();
         _mcpServerMock = new Mock<IMcpServer>();
-        _orchestrator = new AgentOrchestrator(_llmManagerMock.Object, _mcpServerMock.Object);
+        _inputValidator = new InputValidator();
+        _orchestrator = new AgentOrchestrator(_llmManagerMock.Object, _mcpServerMock.Object, _inputValidator);
     }
 
     [Test]
