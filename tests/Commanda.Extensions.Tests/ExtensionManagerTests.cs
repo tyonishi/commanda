@@ -2,6 +2,8 @@ using NUnit.Framework;
 using Moq;
 using Commanda.Core;
 using Commanda.Extensions;
+using System.Composition;
+using System.Composition.Hosting;
 
 namespace Commanda.Extensions.Tests;
 
@@ -116,12 +118,49 @@ public class ExtensionManagerTests
         await _extensionManager.ReloadExtensionsAsync();
 
         // Assert
-        // 現在の実装ではリロード時にクリアされるので、空になるはず
+        // リロードにより拡張機能がクリアされ、再ロードされる
         var extensions = await _extensionManager.GetLoadedExtensionsAsync();
-        Assert.That(extensions, Is.Empty);
+        Assert.That(extensions, Is.Not.Empty);
+        Assert.That(extensions.Any(e => e.Name == "TestMefExtension"), Is.True);
+    }
+
+    [Test]
+    public async Task LoadExtensionsWithMefAsync_LoadsExportedExtensions()
+    {
+        // Arrange - Create MEF container with test extension
+        var configuration = new ContainerConfiguration()
+            .WithPart<TestMefExtension>();
+
+        using var container = configuration.CreateContainer();
+
+        // Create extension manager that uses MEF (future implementation)
+        // For now, this test will fail until MEF is implemented
+        var extensionManager = new ExtensionManager();
+
+        // Act
+        await extensionManager.LoadExtensionsAsync();
+
+        // Assert - Should load MEF exported extensions
+        var extensions = await extensionManager.GetLoadedExtensionsAsync();
+        Assert.That(extensions.Any(e => e.Name == "TestMefExtension"), Is.True);
+    }
+
+    // MEF exported test extension
+    [Export(typeof(IMcpExtension))]
+    private class TestMefExtension : IMcpExtension
+    {
+        public string Name => "TestMefExtension";
+        public string Version => "1.0.0";
+        public IEnumerable<Type> ToolTypes => new[] { typeof(TestTool) };
+
+        public Task InitializeAsync(IServiceProvider? services)
+        {
+            return Task.CompletedTask;
+        }
     }
 
     // テスト用のツールクラス
+    [McpServerToolTypeAttribute]
     private class TestTool
     {
         // テスト用のツール実装

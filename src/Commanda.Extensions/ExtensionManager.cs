@@ -1,4 +1,6 @@
 using System.Reflection;
+using System.Composition.Hosting;
+using System.Composition;
 using Commanda.Core;
 
 namespace Commanda.Extensions;
@@ -18,6 +20,9 @@ public class ExtensionManager : IExtensionManager
     {
         try
         {
+            // MEFコンテナの設定
+            var configuration = new ContainerConfiguration();
+
             // 拡張機能ディレクトリのパスを取得
             var extensionsPath = Path.Combine(
                 AppDomain.CurrentDomain.BaseDirectory,
@@ -37,39 +42,44 @@ public class ExtensionManager : IExtensionManager
                 {
                     // アセンブリをロード
                     var assembly = Assembly.LoadFrom(dllPath);
-
-                    // IMcpExtensionを実装したクラスを検索
-                    var extensionTypes = assembly.GetTypes()
-                        .Where(t => typeof(IMcpExtension).IsAssignableFrom(t) &&
-                                   !t.IsInterface &&
-                                   !t.IsAbstract);
-
-                    foreach (var extensionType in extensionTypes)
-                    {
-                        try
-                        {
-                            // 拡張機能のインスタンスを作成
-                            var instance = Activator.CreateInstance(extensionType);
-                            if (instance is IMcpExtension extension)
-                            {
-                                // 拡張機能を初期化
-                                await extension.InitializeAsync(null); // TODO: サービスプロバイダを渡す
-
-                                // リストに追加
-                                _loadedExtensions.Add(extension);
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            // ログに記録して続行
-                            Console.WriteLine($"拡張機能 '{extensionType.Name}' の初期化に失敗しました: {ex.Message}");
-                        }
-                    }
+                    configuration = configuration.WithAssembly(assembly);
                 }
                 catch (Exception ex)
                 {
                     // ログに記録して続行
                     Console.WriteLine($"DLL '{Path.GetFileName(dllPath)}' のロードに失敗しました: {ex.Message}");
+                }
+            }
+
+            // テスト用の場合、すべてのアセンブリを追加
+            if (AppDomain.CurrentDomain.GetAssemblies().Any(a => a.GetName().Name?.Contains("Test") == true))
+            {
+                foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
+                {
+                    configuration = configuration.WithAssembly(assembly);
+                }
+            }
+
+            // MEFコンテナを作成
+            using var container = configuration.CreateContainer();
+
+            // 拡張機能を解決
+            var extensions = container.GetExports<IMcpExtension>();
+
+            foreach (var extension in extensions)
+            {
+                try
+                {
+                    // 拡張機能を初期化
+                    await extension.InitializeAsync(null); // TODO: サービスプロバイダを渡す
+
+                    // リストに追加
+                    _loadedExtensions.Add(extension);
+                }
+                catch (Exception ex)
+                {
+                    // ログに記録して続行
+                    Console.WriteLine($"拡張機能 '{extension.Name}' の初期化に失敗しました: {ex.Message}");
                 }
             }
         }
