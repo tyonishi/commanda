@@ -12,6 +12,10 @@ public class MessageViewModel : INotifyPropertyChanged
     private string _senderInitial = string.Empty;
     private string _content = string.Empty;
     private DateTime _timestamp;
+    private bool _isSuccess = true;
+    private TimeSpan _duration;
+    private List<string> _warnings = new();
+    private bool _isSystemMessage;
 
     /// <summary>
     /// 送信者名
@@ -72,6 +76,70 @@ public class MessageViewModel : INotifyPropertyChanged
             if (_timestamp != value)
             {
                 _timestamp = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    /// <summary>
+    /// 実行が成功したかどうか
+    /// </summary>
+    public bool IsSuccess
+    {
+        get => _isSuccess;
+        set
+        {
+            if (_isSuccess != value)
+            {
+                _isSuccess = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    /// <summary>
+    /// 実行にかかった時間
+    /// </summary>
+    public TimeSpan Duration
+    {
+        get => _duration;
+        set
+        {
+            if (_duration != value)
+            {
+                _duration = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    /// <summary>
+    /// 警告メッセージのリスト
+    /// </summary>
+    public List<string> Warnings
+    {
+        get => _warnings;
+        set
+        {
+            if (_warnings != value)
+            {
+                _warnings = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    /// <summary>
+    /// システムメッセージかどうか
+    /// </summary>
+    public bool IsSystemMessage
+    {
+        get => _isSystemMessage;
+        set
+        {
+            if (_isSystemMessage != value)
+            {
+                _isSystemMessage = value;
                 OnPropertyChanged();
             }
         }

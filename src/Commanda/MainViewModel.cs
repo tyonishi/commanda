@@ -99,7 +99,10 @@ public class MainViewModel : INotifyPropertyChanged
                 SenderName = "Commanda",
                 SenderInitial = "C",
                 Content = result.Content,
-                Timestamp = DateTime.Now
+                Timestamp = DateTime.Now,
+                IsSuccess = result.IsSuccessful,
+                Duration = result.Duration,
+                Warnings = result.Warnings
             };
 
             Messages.Add(aiMessage);
@@ -111,7 +114,9 @@ public class MainViewModel : INotifyPropertyChanged
                 SenderName = "システム",
                 SenderInitial = "S",
                 Content = $"エラーが発生しました: {ex.Message}",
-                Timestamp = DateTime.Now
+                Timestamp = DateTime.Now,
+                IsSuccess = false,
+                IsSystemMessage = true
             };
 
             Messages.Add(errorMessage);

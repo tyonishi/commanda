@@ -4,9 +4,14 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Commanda"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         mc:Ignorable="d"
         Title="Commanda - AI PC Automation" Height="600" Width="800"
-        WindowStartupLocation="CenterScreen">
+        WindowStartupLocation="CenterScreen"
+        TextElement.FontWeight="Regular"
+        TextElement.FontSize="13"
+        TextOptions.TextFormattingMode="Ideal"
+        TextOptions.TextRenderingMode="Auto">
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
         <local:InitialToColorConverter x:Key="InitialToColorConverter"/>
@@ -23,8 +28,9 @@
             <ItemsControl ItemsSource="{Binding Messages}" Margin="0,0,0,16">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <Border Margin="0,8" Background="White" CornerRadius="8"
-                                BorderBrush="#E0E0E0" BorderThickness="1" Padding="12" MaxWidth="600">
+                        <materialDesign:Card Margin="0,8" Padding="12" MaxWidth="600"
+                                             Background="{DynamicResource MaterialDesignPaper}"
+                                             UniformCornerRadius="8">
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto"/>
@@ -42,20 +48,66 @@
 
                                 <!-- メッセージ内容 -->
                                 <StackPanel Grid.Column="1">
-                                    <TextBlock Text="{Binding SenderName}" FontWeight="SemiBold" Margin="0,0,0,4"/>
-                                     <local:MarkdownTextBlock MarkdownText="{Binding Content}" FontSize="14" LineHeight="1.4"/>
-                                    <TextBlock Text="{Binding Timestamp, StringFormat='{}{0:HH:mm}'}"
-                                               FontSize="11" Foreground="#666666" Margin="0,4,0,0"/>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+
+                                        <TextBlock Grid.Column="0" Text="{Binding SenderName}"
+                                                   FontSize="16" FontWeight="SemiBold"
+                                                   Margin="0,0,0,4"/>
+
+                                        <!-- ステータスアイコン -->
+                                        <TextBlock Grid.Column="1" Text="✓" Foreground="Green" Margin="8,0,0,0"
+                                                   Visibility="{Binding IsSuccess, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                                        <TextBlock Grid.Column="1" Text="⚠" Foreground="Red" Margin="8,0,0,0"
+                                                   Visibility="{Binding IsSuccess, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=inverse}"/>
+                                    </Grid>
+
+                                    <local:MarkdownTextBlock MarkdownText="{Binding Content}"
+                                                             FontSize="14" LineHeight="1.4"
+                                                             Margin="0,0,0,8"/>
+
+                                    <!-- 実行詳細 -->
+                                    <StackPanel Orientation="Horizontal" Margin="0,4,0,0"
+                                                Visibility="{Binding IsSystemMessage, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=inverse}">
+                                        <TextBlock Text="{Binding Timestamp, StringFormat='{}{0:HH:mm}'}"
+                                                   FontSize="11" Foreground="#666666"/>
+                                        <TextBlock Text=" • " FontSize="11" Foreground="#666666"
+                                                   Visibility="{Binding Duration, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                                        <TextBlock Text="{Binding Duration, StringFormat='{}{0:mm\\:ss\\.fff}'}"
+                                                   FontSize="11" Foreground="#666666"
+                                                   Visibility="{Binding Duration, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                                    </StackPanel>
+
+                                    <!-- 警告メッセージ -->
+                                    <ItemsControl ItemsSource="{Binding Warnings}" Margin="0,8,0,0">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Border Background="Orange" CornerRadius="12" Padding="8,4"
+                                                        Margin="0,0,8,4">
+                                                    <TextBlock Text="{Binding}" Foreground="White" FontSize="11"/>
+                                                </Border>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <WrapPanel/>
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                    </ItemsControl>
                                 </StackPanel>
                             </Grid>
-                        </Border>
+                        </materialDesign:Card>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
         </ScrollViewer>
 
         <!-- 入力エリア -->
-        <Border Grid.Row="1" Background="#F8F9FA" BorderBrush="#E0E0E0" BorderThickness="0,1,0,0" Padding="16">
+        <materialDesign:Card Grid.Row="1" Margin="16,0,16,16" Padding="16"
+                             Background="{DynamicResource MaterialDesignCardBackground}">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
@@ -65,20 +117,24 @@
                 <!-- テキスト入力 -->
                 <TextBox Grid.Column="0" Text="{Binding CurrentMessage, UpdateSourceTrigger=PropertyChanged}"
                          AcceptsReturn="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto"
-                         Height="60" Margin="0,0,12,0" Padding="8"
+                         MinHeight="48" Margin="0,0,12,0" Padding="8"
                          IsEnabled="{Binding IsExecuting, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=inverse}"/>
 
                 <!-- 送信ボタン -->
-                <Button Grid.Column="1" Content="送信" Command="{Binding SendCommand}"
-                        Width="80" Height="60" VerticalAlignment="Top"
+                <Button Grid.Column="1" Content="送信"
+                        Command="{Binding SendCommand}"
+                        Width="80" Height="48"
+                        ToolTip="送信"
                         IsEnabled="{Binding IsExecuting, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=inverse}"/>
 
                 <!-- 実行中インジケーター -->
-                <TextBlock Grid.Column="0" Grid.ColumnSpan="2" Text="実行中..."
+                <StackPanel Grid.Column="0" Grid.ColumnSpan="2"
                            HorizontalAlignment="Center" VerticalAlignment="Center"
-                           Visibility="{Binding IsExecuting, Converter={StaticResource BooleanToVisibilityConverter}}"
-                           FontStyle="Italic" Foreground="#666666"/>
+                           Visibility="{Binding IsExecuting, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <TextBlock Text="⏳" FontSize="24" Margin="0,0,0,8"/>
+                    <TextBlock Text="実行中..." FontSize="12" Foreground="#666666"/>
+                </StackPanel>
             </Grid>
-        </Border>
+        </materialDesign:Card>
     </Grid>
 </Window>

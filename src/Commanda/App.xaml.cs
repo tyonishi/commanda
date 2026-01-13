@@ -25,6 +25,8 @@ public partial class App : Application
                 services.AddSingleton<ILlmProviderManager, LlmProviderManager>();
                 services.AddSingleton<IMcpServer, McpServer>();
                 services.AddSingleton<IAgentOrchestrator, AgentOrchestrator>();
+                services.AddSingleton<InputValidator>();
+                services.AddSingleton<SecureStorage>();
 
                 // Extensions
                 services.AddSingleton<IExtensionManager, ExtensionManager>();
