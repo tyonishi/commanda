@@ -44,7 +44,7 @@ public class TaskPlannerTests
         // Assert
         Assert.NotNull(result);
         Assert.Equal("ファイルコピー計画", result.Description);
-        Assert.Equal(1, result.Steps.Count);
+        Assert.Single(result.Steps);
         Assert.Equal("copy_file", result.Steps[0].ToolName);
     }
 
@@ -93,7 +93,7 @@ public class TaskPlannerTests
                    .Returns(CreateAsyncEnumerable(invalidJson));
 
         // Act & Assert
-        Assert.ThrowsAsync<PlanningException>(async () => await _taskPlanner.GeneratePlanAsync(context));
+        await Assert.ThrowsAsync<PlanningException>(async () => await _taskPlanner.GeneratePlanAsync(context));
     }
 
     private async IAsyncEnumerable<string> CreateAsyncEnumerable(string value)

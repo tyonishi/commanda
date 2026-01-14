@@ -79,7 +79,7 @@ public class InputValidatorTests
 
         // Assert
         Assert.True(result.IsValid);
-        Assert.Equal(1, result.Warnings.Count());
+        Assert.Single(result.Warnings);
         Assert.Equal("SQLインジェクションの疑いがあります", result.Warnings[0]);
     }
 

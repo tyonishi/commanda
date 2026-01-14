@@ -123,8 +123,8 @@ public class AgentOrchestratorTests
 
         // Assert
         Assert.False(result.IsSuccessful);
-        Assert.That(result.Content, Does.Contain(expectedError));
-        Assert.That(result.StepsExecuted, Is.EqualTo(0));
+        Assert.Contains(expectedError, result.Content);
+        Assert.Equal(0, result.StepsExecuted);
     }
 
     [Fact]
@@ -198,7 +198,7 @@ public class AgentOrchestratorTests
 
         // Assert
         Assert.True(result.IsSuccessful);
-        Assert.That(result.StepsExecuted, Is.EqualTo(2)); // Executed twice due to retry
+        Assert.Equal(2, result.StepsExecuted); // Executed twice due to retry
 
         // Verify interactions
         _taskPlannerMock.Verify(p => p.GeneratePlanAsync(It.IsAny<AgentContext>(), It.IsAny<CancellationToken>()), Times.Exactly(2));
@@ -239,6 +239,6 @@ public class AgentOrchestratorTests
 
         // Assert
         Assert.False(result.IsSuccessful);
-        Assert.That(result.Content, Does.Contain("キャンセル"));
+        Assert.Contains("キャンセル", result.Content);
     }
 }

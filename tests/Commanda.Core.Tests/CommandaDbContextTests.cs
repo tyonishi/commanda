@@ -150,6 +150,6 @@ public class CommandaDbContextTests : IDisposable
         _context.Extensions.Add(extension1);
         _context.Extensions.Add(extension2);
 
-        Assert.ThrowsAsync<DbUpdateException>(async () => await _context.SaveChangesAsync());
+        await Assert.ThrowsAsync<DbUpdateException>(async () => await _context.SaveChangesAsync());
     }
 }
