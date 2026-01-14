@@ -80,22 +80,22 @@ public class AgentContext
     /// <summary>
     /// 完了しているかどうか
     /// </summary>
-    public bool IsCompleted { get; private set; }
+    public bool IsCompleted { get; set; }
 
     /// <summary>
     /// キャンセルされているかどうか
     /// </summary>
-    public bool IsCancelled { get; private set; }
+    public bool IsCancelled { get; set; }
 
     /// <summary>
     /// キャンセル理由
     /// </summary>
-    public string? CancellationReason { get; private set; }
+    public string? CancellationReason { get; set; }
 
     /// <summary>
     /// 開始日時
     /// </summary>
-    public DateTime StartedAt { get; } = DateTime.UtcNow;
+    public DateTime StartedAt { get; set; }
 
     /// <summary>
     /// 実行結果を追加します
