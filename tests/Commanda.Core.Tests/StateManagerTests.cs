@@ -1,35 +1,39 @@
-using NUnit.Framework;
+using Xunit;
 using Commanda.Core;
 using Moq;
 using Microsoft.Extensions.Logging;
 
 namespace Commanda.Core.Tests;
 
-[TestFixture]
-public class StateManagerTests
+public class StateManagerTests : IDisposable
 {
-    private Mock<ILogger<StateManager>> _loggerMock = null!;
-    private StateManager _stateManager = null!;
-    private string _testStateDirectory = null!;
+    private readonly Mock<ILogger<StateManager>> _loggerMock;
+    private readonly StateManager _stateManager;
+    private readonly string _testStateDirectory;
 
-    [SetUp]
-    public void Setup()
+    public StateManagerTests()
     {
         _loggerMock = new Mock<ILogger<StateManager>>();
-        _testStateDirectory = Path.Combine(Path.GetTempPath(), "CommandaTest", "State");
+        _testStateDirectory = Path.Combine(Path.GetTempPath(), "CommandaTest", $"State_{Guid.NewGuid()}");
         _stateManager = new StateManager(_loggerMock.Object, _testStateDirectory);
     }
 
-    [TearDown]
-    public void TearDown()
+    public void Dispose()
     {
-        if (Directory.Exists(_testStateDirectory))
+        try
         {
-            Directory.Delete(_testStateDirectory, true);
+            if (Directory.Exists(_testStateDirectory))
+            {
+                Directory.Delete(_testStateDirectory, true);
+            }
+        }
+        catch
+        {
+            // クリーンアップエラーは無視
         }
     }
 
-    [Test]
+    [Fact]
     public async Task SaveStateAsync_ValidContext_SavesStateToFile()
     {
         // Arrange
@@ -46,14 +50,14 @@ public class StateManagerTests
 
         // Assert
         var files = Directory.GetFiles(_testStateDirectory, "*.state.json");
-        Assert.AreEqual(1, files.Length);
+        Assert.Single(files);
 
         var fileContent = await File.ReadAllTextAsync(files[0]);
-        Assert.That(fileContent, Does.Contain("Test input"));
-        Assert.That(fileContent, Does.Contain("\"Status\":1"));
+        Assert.Contains("Test input", fileContent);
+        Assert.Contains("Planning", fileContent);
     }
 
-    [Test]
+    [Fact]
     public async Task LoadStateAsync_ExistingSessionId_ReturnsContext()
     {
         // Arrange
@@ -71,23 +75,23 @@ public class StateManagerTests
         var loadedContext = await _stateManager.LoadStateAsync(sessionId);
 
         // Assert
-        Assert.IsNotNull(loadedContext);
-        Assert.AreEqual("Load test", loadedContext!.UserInput);
-        Assert.AreEqual(ExecutionStatus.Completed, loadedContext!.Status);
-        Assert.IsTrue(loadedContext!.IsCompleted);
+        Assert.NotNull(loadedContext);
+        Assert.Equal("Load test", loadedContext.UserInput);
+        Assert.Equal(ExecutionStatus.Completed, loadedContext.Status);
+        Assert.True(loadedContext.IsCompleted);
     }
 
-    [Test]
+    [Fact]
     public async Task LoadStateAsync_NonExistentSessionId_ReturnsNull()
     {
         // Act
         var result = await _stateManager.LoadStateAsync("nonexistent");
 
         // Assert
-        Assert.IsNull(result);
+        Assert.Null(result);
     }
 
-    [Test]
+    [Fact]
     public async Task ClearStateAsync_ExistingSessionId_RemovesStateFile()
     {
         // Arrange
@@ -97,14 +101,14 @@ public class StateManagerTests
 
         // Verify file exists
         var filesBefore = Directory.GetFiles(_testStateDirectory, "*.state.json");
-        Assert.AreEqual(1, filesBefore.Length);
+        Assert.Single(filesBefore);
 
         // Act
         await _stateManager.ClearStateAsync(sessionId);
 
         // Assert
         var filesAfter = Directory.GetFiles(_testStateDirectory, "*.state.json");
-        Assert.AreEqual(0, filesAfter.Length);
+        Assert.Empty(filesAfter);
     }
 
     private string GenerateExpectedSessionId(AgentContext context)

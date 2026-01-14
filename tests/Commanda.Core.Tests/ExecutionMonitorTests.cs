@@ -1,24 +1,22 @@
-using NUnit.Framework;
+using Xunit;
 using Moq;
 using Commanda.Core;
 using Microsoft.Extensions.Logging;
 
 namespace Commanda.Core.Tests;
 
-[TestFixture]
 public class ExecutionMonitorTests
 {
-    private Mock<ILogger<ExecutionMonitor>> _loggerMock = null!;
-    private ExecutionMonitor _monitor = null!;
+    private readonly Mock<ILogger<ExecutionMonitor>> _loggerMock;
+    private readonly ExecutionMonitor _monitor;
 
-    [SetUp]
-    public void Setup()
+    public ExecutionMonitorTests()
     {
         _loggerMock = new Mock<ILogger<ExecutionMonitor>>();
         _monitor = new ExecutionMonitor(_loggerMock.Object);
     }
 
-    [Test]
+    [Fact]
     public async Task EvaluateResultAsync_SuccessfulResult_ReturnsSuccessfulEvaluation()
     {
         // Arrange
@@ -29,12 +27,12 @@ public class ExecutionMonitorTests
         var evaluation = await _monitor.EvaluateResultAsync(result, context);
 
         // Assert
-        Assert.IsTrue(evaluation.IsSuccessful);
-        Assert.AreEqual("実行が正常に完了しました", evaluation.Reason);
-        Assert.IsFalse(evaluation.ShouldRetry);
+        Assert.True(evaluation.IsSuccessful);
+        Assert.Equal("実行が正常に完了しました", evaluation.Reason);
+        Assert.False(evaluation.ShouldRetry);
     }
 
-    [Test]
+    [Fact]
     public async Task EvaluateResultAsync_FailedResultWithRetryableError_ReturnsRetryEvaluation()
     {
         // Arrange
@@ -50,12 +48,12 @@ public class ExecutionMonitorTests
         var evaluation = await _monitor.EvaluateResultAsync(result, context);
 
         // Assert
-        Assert.IsFalse(evaluation.IsSuccessful);
-        Assert.IsTrue(evaluation.ShouldRetry);
-        Assert.That(evaluation.Feedback, Does.Contain("リトライ"));
+        Assert.False(evaluation.IsSuccessful);
+        Assert.True(evaluation.ShouldRetry);
+        Assert.Contains("リトライ", evaluation.Feedback);
     }
 
-    [Test]
+    [Fact]
     public async Task EvaluateResultAsync_LongExecutionTime_AddsPerformanceFeedback()
     {
         // Arrange
@@ -70,7 +68,7 @@ public class ExecutionMonitorTests
         var evaluation = await _monitor.EvaluateResultAsync(result, context);
 
         // Assert
-        Assert.IsTrue(evaluation.IsSuccessful);
-        Assert.That(evaluation.Feedback, Does.Contain("実行時間が長くなっています"));
+        Assert.True(evaluation.IsSuccessful);
+        Assert.Contains("実行時間が長くなっています", evaluation.Feedback);
     }
 }

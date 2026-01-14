@@ -1,24 +1,22 @@
-using NUnit.Framework;
+using Xunit;
 using Moq;
 using Microsoft.Extensions.Logging;
 using Commanda.Core;
 
 namespace Commanda.Core.Tests;
 
-[TestFixture]
 public class GlobalExceptionHandlerTests
 {
-    private Mock<ILogger<GlobalExceptionHandler>> _loggerMock = null!;
-    private GlobalExceptionHandler _handler = null!;
+    private readonly Mock<ILogger<GlobalExceptionHandler>> _loggerMock;
+    private readonly GlobalExceptionHandler _handler;
 
-    [SetUp]
-    public void Setup()
+    public GlobalExceptionHandlerTests()
     {
         _loggerMock = new Mock<ILogger<GlobalExceptionHandler>>();
         _handler = new GlobalExceptionHandler(_loggerMock.Object);
     }
 
-    [Test]
+    [Fact]
     public void HandleException_CommandaException_ShowsUserFriendlyMessage()
     {
         // Arrange
@@ -38,7 +36,7 @@ public class GlobalExceptionHandlerTests
             Times.Once);
     }
 
-    [Test]
+    [Fact]
     public void HandleException_GenericException_ShowsGenericMessage()
     {
         // Arrange
@@ -58,7 +56,7 @@ public class GlobalExceptionHandlerTests
             Times.Once);
     }
 
-    [Test]
+    [Fact]
     public void HandleException_PlanningException_ShowsPlanningErrorMessage()
     {
         // Arrange
