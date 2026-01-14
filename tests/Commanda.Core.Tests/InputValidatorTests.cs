@@ -6,15 +6,14 @@ namespace Commanda.Core.Tests;
 [TestFixture]
 public class InputValidatorTests
 {
-    private InputValidator _validator = null!;
+    private readonly InputValidator _validator;
 
-    [SetUp]
-    public void Setup()
+    public InputValidatorTests()
     {
         _validator = new InputValidator();
     }
 
-    [Test]
+    [Fact]
     public void ValidateUserInput_ValidInput_ReturnsValid()
     {
         // Arrange
@@ -24,11 +23,11 @@ public class InputValidatorTests
         var result = _validator.ValidateUserInput(input);
 
         // Assert
-        Assert.That(result.IsValid, Is.True);
-        Assert.That(result.ErrorMessage, Is.Null);
+        Assert.IsTrue(result.IsValid);
+        Assert.IsNull(result.ErrorMessage);
     }
 
-    [Test]
+    [Fact]
     public void ValidateUserInput_EmptyInput_ReturnsInvalid()
     {
         // Arrange
@@ -38,11 +37,11 @@ public class InputValidatorTests
         var result = _validator.ValidateUserInput(input);
 
         // Assert
-        Assert.That(result.IsValid, Is.False);
-        Assert.That(result.ErrorMessage, Is.EqualTo("入力が空です"));
+        Assert.IsFalse(result.IsValid);
+        Assert.AreEqual("入力が空です", result.ErrorMessage);
     }
 
-    [Test]
+    [Fact]
     public void ValidateUserInput_DangerousCommand_ReturnsInvalid()
     {
         // Arrange
@@ -52,11 +51,11 @@ public class InputValidatorTests
         var result = _validator.ValidateUserInput(input);
 
         // Assert
-        Assert.That(result.IsValid, Is.False);
-        Assert.That(result.ErrorMessage, Is.EqualTo("危険なコマンドが含まれています"));
+        Assert.IsFalse(result.IsValid);
+        Assert.AreEqual("危険なコマンドが含まれています", result.ErrorMessage);
     }
 
-    [Test]
+    [Fact]
     public void ValidateUserInput_TooLongInput_ReturnsInvalid()
     {
         // Arrange
@@ -66,11 +65,11 @@ public class InputValidatorTests
         var result = _validator.ValidateUserInput(input);
 
         // Assert
-        Assert.That(result.IsValid, Is.False);
-        Assert.That(result.ErrorMessage, Is.EqualTo("入力が長すぎます（最大10000文字）"));
+        Assert.IsFalse(result.IsValid);
+        Assert.AreEqual("入力が長すぎます（最大10000文字）", result.ErrorMessage);
     }
 
-    [Test]
+    [Fact]
     public void ValidateUserInput_SqlInjectionPattern_ReturnsWarning()
     {
         // Arrange
@@ -80,26 +79,26 @@ public class InputValidatorTests
         var result = _validator.ValidateUserInput(input);
 
         // Assert
-        Assert.That(result.IsValid, Is.True);
-        Assert.That(result.Warnings, Has.Count.EqualTo(1));
-        Assert.That(result.Warnings[0], Is.EqualTo("SQLインジェクションの疑いがあります"));
+        Assert.IsTrue(result.IsValid);
+        Assert.AreEqual(1, result.Warnings.Count());
+        Assert.AreEqual("SQLインジェクションの疑いがあります", result.Warnings[0]);
     }
 
-    [Test]
+    [Fact]
     public void ValidateFilePath_ValidPath_ReturnsValid()
     {
         // Arrange
-        var path = "C:\\temp\\test.txt";
+        var path = "C:\\temp\\Fact.txt";
 
         // Act
         var result = _validator.ValidateFilePath(path);
 
         // Assert
-        Assert.That(result.IsValid, Is.True);
-        Assert.That(result.ErrorMessage, Is.Null);
+        Assert.IsTrue(result.IsValid);
+        Assert.IsNull(result.ErrorMessage);
     }
 
-    [Test]
+    [Fact]
     public void ValidateFilePath_PathTraversal_ReturnsInvalid()
     {
         // Arrange
@@ -109,11 +108,11 @@ public class InputValidatorTests
         var result = _validator.ValidateFilePath(path);
 
         // Assert
-        Assert.That(result.IsValid, Is.False);
-        Assert.That(result.ErrorMessage, Is.EqualTo("パストラバーサル攻撃の可能性があります"));
+        Assert.IsFalse(result.IsValid);
+        Assert.AreEqual("パストラバーサル攻撃の可能性があります", result.ErrorMessage);
     }
 
-    [Test]
+    [Fact]
     public void ValidateFilePath_SystemPath_ReturnsInvalid()
     {
         // Arrange
@@ -123,7 +122,7 @@ public class InputValidatorTests
         var result = _validator.ValidateFilePath(path);
 
         // Assert
-        Assert.That(result.IsValid, Is.False);
-        Assert.That(result.ErrorMessage, Is.EqualTo("危険なファイルパスです"));
+        Assert.IsFalse(result.IsValid);
+        Assert.AreEqual("危険なファイルパスです", result.ErrorMessage);
     }
 }

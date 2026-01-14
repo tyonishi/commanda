@@ -1,20 +1,18 @@
-using NUnit.Framework;
+using Xunit;
 using Microsoft.EntityFrameworkCore;
 using Commanda.Core;
 
 namespace Commanda.Core.Tests;
 
-[TestFixture]
-public class RepositoryTests
+public class RepositoryTests : IDisposable
 {
-    private CommandaDbContext _context = null!;
-    private Repository<ExecutionLog> _repository = null!;
+    private readonly CommandaDbContext _context;
+    private readonly Repository<ExecutionLog> _repository;
 
-    [SetUp]
-    public void Setup()
+    public RepositoryTests()
     {
         var options = new DbContextOptionsBuilder<CommandaDbContext>()
-            .UseInMemoryDatabase(databaseName: "TestDatabase")
+            .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
             .Options;
 
         _context = new CommandaDbContext(options);
@@ -22,14 +20,13 @@ public class RepositoryTests
         _repository = new Repository<ExecutionLog>(_context);
     }
 
-    [TearDown]
-    public void TearDown()
+    public void Dispose()
     {
         _context.Database.EnsureDeleted();
         _context.Dispose();
     }
 
-    [Test]
+    [Fact]
     public async Task AddAsync_AddsEntityToDatabase()
     {
         // Arrange
@@ -45,12 +42,12 @@ public class RepositoryTests
         var result = await _repository.AddAsync(log);
 
         // Assert
-        Assert.IsNotNull(result);
-        Assert.AreEqual(1, result.Id);
-        Assert.AreEqual("Test task", result.TaskDescription);
+        Assert.NotNull(result);
+        Assert.Equal(1, result.Id);
+        Assert.Equal("Test task", result.TaskDescription);
     }
 
-    [Test]
+    [Fact]
     public async Task GetByIdAsync_ReturnsEntity_WhenEntityExists()
     {
         // Arrange
@@ -67,21 +64,21 @@ public class RepositoryTests
         var result = await _repository.GetByIdAsync(1);
 
         // Assert
-        Assert.IsNotNull(result);
-        Assert.AreEqual("Test task", result!.TaskDescription);
+        Assert.NotNull(result);
+        Assert.Equal("Test task", result!.TaskDescription);
     }
 
-    [Test]
+    [Fact]
     public async Task GetByIdAsync_ReturnsNull_WhenEntityDoesNotExist()
     {
         // Act
         var result = await _repository.GetByIdAsync(999);
 
         // Assert
-        Assert.IsNull(result);
+        Assert.Null(result);
     }
 
-    [Test]
+    [Fact]
     public async Task FindAsync_ReturnsMatchingEntities()
     {
         // Arrange
@@ -92,11 +89,11 @@ public class RepositoryTests
         var results = await _repository.FindAsync(l => l.Status == "Completed");
 
         // Assert
-        Assert.AreEqual(1, results.Count());
-        Assert.AreEqual("Task 1", results.First().TaskDescription);
+        Assert.Single(results);
+        Assert.Equal("Task 1", results.First().TaskDescription);
     }
 
-    [Test]
+    [Fact]
     public async Task UpdateAsync_UpdatesEntityInDatabase()
     {
         // Arrange
@@ -109,11 +106,11 @@ public class RepositoryTests
         var updated = await _repository.GetByIdAsync(log.Id);
 
         // Assert
-        Assert.IsNotNull(updated);
-        Assert.AreEqual("Completed", updated!.Status);
+        Assert.NotNull(updated);
+        Assert.Equal("Completed", updated!.Status);
     }
 
-    [Test]
+    [Fact]
     public async Task DeleteAsync_RemovesEntityFromDatabase()
     {
         // Arrange
@@ -125,10 +122,10 @@ public class RepositoryTests
         var result = await _repository.GetByIdAsync(log.Id);
 
         // Assert
-        Assert.IsNull(result);
+        Assert.Null(result);
     }
 
-    [Test]
+    [Fact]
     public async Task ExistsAsync_ReturnsTrue_WhenEntityExists()
     {
         // Arrange
@@ -139,10 +136,10 @@ public class RepositoryTests
         var exists = await _repository.ExistsAsync(l => l.TaskDescription == "Exists test");
 
         // Assert
-        Assert.IsTrue(exists);
+        Assert.True(exists);
     }
 
-    [Test]
+    [Fact]
     public async Task CountAsync_ReturnsCorrectCount()
     {
         // Arrange
@@ -154,6 +151,6 @@ public class RepositoryTests
         var count = await _repository.CountAsync(l => l.Status == "Completed");
 
         // Assert
-        Assert.AreEqual(2, count);
+        Assert.Equal(2, count);
     }
 }
