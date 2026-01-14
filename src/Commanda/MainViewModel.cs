@@ -58,6 +58,11 @@ public class MainViewModel : INotifyPropertyChanged
     public RelayCommand SendCommand { get; }
 
     /// <summary>
+    /// キャンセルコマンド
+    /// </summary>
+    public RelayCommand CancelCommand { get; }
+
+    /// <summary>
     /// コンストラクタ
     /// </summary>
     /// <param name="agentOrchestrator">エージェントオーケストレーター</param>
@@ -68,6 +73,10 @@ public class MainViewModel : INotifyPropertyChanged
         SendCommand = new RelayCommand(
             async () => await SendMessageAsync(),
             () => !string.IsNullOrWhiteSpace(CurrentMessage) && !IsExecuting);
+
+        CancelCommand = new RelayCommand(
+            async () => await CancelExecutionAsync(),
+            () => IsExecuting);
     }
 
     /// <summary>
@@ -125,6 +134,28 @@ public class MainViewModel : INotifyPropertyChanged
         {
             IsExecuting = false;
         }
+    }
+
+    /// <summary>
+    /// 実行をキャンセルします
+    /// </summary>
+    /// <returns>キャンセル処理のタスク</returns>
+    private async Task CancelExecutionAsync()
+    {
+        await _agentOrchestrator.CancelExecutionAsync();
+
+        var cancelMessage = new MessageViewModel
+        {
+            SenderName = "システム",
+            SenderInitial = "S",
+            Content = "実行がキャンセルされました。",
+            Timestamp = DateTime.Now,
+            IsSuccess = false,
+            IsSystemMessage = true
+        };
+
+        Messages.Add(cancelMessage);
+        IsExecuting = false;
     }
 
     /// <summary>

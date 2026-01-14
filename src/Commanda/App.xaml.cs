@@ -24,6 +24,9 @@ public partial class App : Application
                 // Core services
                 services.AddSingleton<ILlmProviderManager, LlmProviderManager>();
                 services.AddSingleton<IMcpServer, McpServer>();
+                services.AddSingleton<ITaskPlanner, TaskPlanner>();
+                services.AddSingleton<IExecutionMonitor, ExecutionMonitor>();
+                services.AddSingleton<IStateManager, StateManager>();
                 services.AddSingleton<IAgentOrchestrator, AgentOrchestrator>();
                 services.AddSingleton<InputValidator>();
                 services.AddSingleton<SecureStorage>();

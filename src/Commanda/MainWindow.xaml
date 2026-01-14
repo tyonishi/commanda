@@ -11,7 +11,9 @@
         TextElement.FontWeight="Regular"
         TextElement.FontSize="13"
         TextOptions.TextFormattingMode="Ideal"
-        TextOptions.TextRenderingMode="Auto">
+        TextOptions.TextRenderingMode="Auto"
+        AutomationProperties.Name="Commanda AI PC Automation Tool"
+        AutomationProperties.HelpText="AIを活用したPC操作自動化ツール。自然言語で指示すると、AIがタスクを分析して実行します。">
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
         <local:InitialToColorConverter x:Key="InitialToColorConverter"/>
@@ -24,13 +26,18 @@
         </Grid.RowDefinitions>
 
         <!-- メッセージリスト -->
-        <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto" Margin="16">
-            <ItemsControl ItemsSource="{Binding Messages}" Margin="0,0,0,16">
+        <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto" Margin="16"
+                      AutomationProperties.Name="メッセージ履歴"
+                      AutomationProperties.HelpText="AIとの会話履歴と実行結果を表示します">
+            <ItemsControl ItemsSource="{Binding Messages}" Margin="0,0,0,16"
+                         AutomationProperties.Name="メッセージ一覧">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
                         <materialDesign:Card Margin="0,8" Padding="12" MaxWidth="600"
-                                             Background="{DynamicResource MaterialDesignPaper}"
-                                             UniformCornerRadius="8">
+                                              Background="{DynamicResource MaterialDesignPaper}"
+                                              UniformCornerRadius="8"
+                                              AutomationProperties.Name="{Binding SenderName, StringFormat='{}{0}からのメッセージ'}"
+                                              AutomationProperties.HelpText="{Binding Content}">
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto"/>
@@ -107,7 +114,9 @@
 
         <!-- 入力エリア -->
         <materialDesign:Card Grid.Row="1" Margin="16,0,16,16" Padding="16"
-                             Background="{DynamicResource MaterialDesignCardBackground}">
+                             Background="{DynamicResource MaterialDesignCardBackground}"
+                             AutomationProperties.Name="コマンド入力エリア"
+                             AutomationProperties.HelpText="AIに指示するコマンドを入力してください">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
@@ -118,21 +127,31 @@
                 <TextBox Grid.Column="0" Text="{Binding CurrentMessage, UpdateSourceTrigger=PropertyChanged}"
                          AcceptsReturn="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto"
                          MinHeight="48" Margin="0,0,12,0" Padding="8"
-                         IsEnabled="{Binding IsExecuting, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=inverse}"/>
+                         IsEnabled="{Binding IsExecuting, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=inverse}"
+                         AutomationProperties.Name="コマンド入力フィールド"
+                         AutomationProperties.HelpText="AIに実行してほしい操作を自然言語で入力してください。Enterキーで送信できます。"
+                         AutomationProperties.LabeledBy="{Binding RelativeSource={RelativeSource Self}}"/>
 
                 <!-- 送信ボタン -->
                 <Button Grid.Column="1" Content="送信"
                         Command="{Binding SendCommand}"
                         Width="80" Height="48"
-                        ToolTip="送信"
-                        IsEnabled="{Binding IsExecuting, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=inverse}"/>
+                        ToolTip="コマンドを送信して実行"
+                        IsEnabled="{Binding IsExecuting, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=inverse}"
+                        AutomationProperties.Name="送信ボタン"
+                        AutomationProperties.HelpText="入力したコマンドをAIに送信して実行します"/>
 
                 <!-- 実行中インジケーター -->
                 <StackPanel Grid.Column="0" Grid.ColumnSpan="2"
                            HorizontalAlignment="Center" VerticalAlignment="Center"
-                           Visibility="{Binding IsExecuting, Converter={StaticResource BooleanToVisibilityConverter}}">
-                    <TextBlock Text="⏳" FontSize="24" Margin="0,0,0,8"/>
-                    <TextBlock Text="実行中..." FontSize="12" Foreground="#666666"/>
+                           Visibility="{Binding IsExecuting, Converter={StaticResource BooleanToVisibilityConverter}}"
+                           AutomationProperties.Name="実行状態インジケーター"
+                           AutomationProperties.HelpText="AIがコマンドを実行中です。完了までお待ちください。"
+                           AutomationProperties.LiveSetting="Assertive">
+                    <TextBlock Text="⏳" FontSize="24" Margin="0,0,0,8"
+                              AutomationProperties.Name="実行中アイコン"/>
+                    <TextBlock Text="実行中..." FontSize="12" Foreground="#666666"
+                              AutomationProperties.Name="実行中メッセージ"/>
                 </StackPanel>
             </Grid>
         </materialDesign:Card>
