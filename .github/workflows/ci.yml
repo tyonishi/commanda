@@ -29,13 +29,13 @@ jobs:
       run: |
         # Check main projects for vulnerable NuGet packages
         echo "Checking Commanda.csproj for vulnerabilities:"
-        dotnet list package --vulnerable --project src/Commanda/Commanda.csproj
+        dotnet list src/Commanda/Commanda.csproj package --vulnerable
         echo "Checking Commanda.Core.csproj for vulnerabilities:"
-        dotnet list package --vulnerable --project src/Commanda.Core/Commanda.Core.csproj
+        dotnet list src/Commanda.Core/Commanda.Core.csproj package --vulnerable
         echo "Checking Commanda.Mcp.csproj for vulnerabilities:"
-        dotnet list package --vulnerable --project src/Commanda.Mcp/Commanda.Mcp.csproj
+        dotnet list src/Commanda.Mcp/Commanda.Mcp.csproj package --vulnerable
         echo "Checking Commanda.Extensions.csproj for vulnerabilities:"
-        dotnet list package --vulnerable --project src/Commanda.Extensions/Commanda.Extensions.csproj
+        dotnet list src/Commanda.Extensions/Commanda.Extensions.csproj package --vulnerable
       # Critical decision: Run vulnerability check on all main projects to identify security issues in dependencies; fail pipeline if vulnerabilities found
 
     - name: Build solution
