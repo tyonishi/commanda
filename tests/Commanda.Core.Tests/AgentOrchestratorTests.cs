@@ -1,23 +1,21 @@
 using Microsoft.Extensions.Logging;
 using Moq;
-using NUnit.Framework;
+using Xunit;
 
 namespace Commanda.Core.Tests;
 
-[TestFixture]
 public class AgentOrchestratorTests
 {
-    private Mock<ITaskPlanner> _taskPlannerMock = null!;
-    private Mock<IExecutionMonitor> _executionMonitorMock = null!;
-    private Mock<IStateManager> _stateManagerMock = null!;
-    private Mock<ILlmProviderManager> _llmManagerMock = null!;
-    private Mock<IMcpServer> _mcpServerMock = null!;
-    private InputValidator _inputValidator = null!;
-    private Mock<ILogger<AgentOrchestrator>> _loggerMock = null!;
-    private AgentOrchestrator _orchestrator = null!;
+    private readonly Mock<ITaskPlanner> _taskPlannerMock;
+    private readonly Mock<IExecutionMonitor> _executionMonitorMock;
+    private readonly Mock<IStateManager> _stateManagerMock;
+    private readonly Mock<ILlmProviderManager> _llmManagerMock;
+    private readonly Mock<IMcpServer> _mcpServerMock;
+    private readonly InputValidator _inputValidator;
+    private readonly Mock<ILogger<AgentOrchestrator>> _loggerMock;
+    private readonly AgentOrchestrator _orchestrator;
 
-    [SetUp]
-    public void Setup()
+    public AgentOrchestratorTests()
     {
         _taskPlannerMock = new Mock<ITaskPlanner>();
         _executionMonitorMock = new Mock<IExecutionMonitor>();
@@ -45,7 +43,7 @@ public class AgentOrchestratorTests
             _loggerMock.Object);
     }
 
-    [Test]
+    [Fact]
     public async Task ExecuteTaskAsync_ValidInput_ReturnsSuccessfulResult()
     {
         // Arrange
@@ -97,10 +95,10 @@ public class AgentOrchestratorTests
         var result = await _orchestrator.ExecuteTaskAsync(userInput);
 
         // Assert
-        Assert.That(result.IsSuccessful, Is.True);
-        Assert.That(result.Content, Does.Contain("正常に完了"));
-        Assert.That(result.StepsExecuted, Is.EqualTo(1));
-        Assert.That(result.Duration, Is.GreaterThan(TimeSpan.Zero));
+        Assert.True(result.IsSuccessful);
+        Assert.Contains("正常に完了", result.Content);
+        Assert.Equal(1, result.StepsExecuted);
+        Assert.True(result.Duration > TimeSpan.Zero);
 
         // Verify interactions
         _taskPlannerMock.Verify(p => p.GeneratePlanAsync(It.IsAny<AgentContext>(), It.IsAny<CancellationToken>()), Times.Once);
@@ -109,7 +107,7 @@ public class AgentOrchestratorTests
         _stateManagerMock.Verify(m => m.SaveStateAsync(It.IsAny<AgentContext>()), Times.AtLeastOnce);
     }
 
-    [Test]
+    [Fact]
     public async Task ExecuteTaskAsync_PlanningFails_ReturnsFailedResult()
     {
         // Arrange
@@ -124,22 +122,22 @@ public class AgentOrchestratorTests
         var result = await _orchestrator.ExecuteTaskAsync(userInput);
 
         // Assert
-        Assert.That(result.IsSuccessful, Is.False);
+        Assert.False(result.IsSuccessful);
         Assert.That(result.Content, Does.Contain(expectedError));
         Assert.That(result.StepsExecuted, Is.EqualTo(0));
     }
 
-    [Test]
+    [Fact]
     public void GetCurrentStatus_NoExecution_ReturnsIdle()
     {
         // Act
         var status = _orchestrator.GetCurrentStatus();
 
         // Assert
-        Assert.That(status, Is.EqualTo(ExecutionStatus.Idle));
+        Assert.Equal(ExecutionStatus.Idle, status);
     }
 
-    [Test]
+    [Fact]
     public async Task ExecuteTaskAsync_RetryRequired_ContinuesExecution()
     {
         // Arrange
@@ -199,7 +197,7 @@ public class AgentOrchestratorTests
         var result = await _orchestrator.ExecuteTaskAsync(userInput);
 
         // Assert
-        Assert.That(result.IsSuccessful, Is.True);
+        Assert.True(result.IsSuccessful);
         Assert.That(result.StepsExecuted, Is.EqualTo(2)); // Executed twice due to retry
 
         // Verify interactions
@@ -207,7 +205,7 @@ public class AgentOrchestratorTests
         _executionMonitorMock.Verify(m => m.EvaluateResultAsync(It.IsAny<ExecutionResult>(), It.IsAny<AgentContext>()), Times.Exactly(2));
     }
 
-    [Test]
+    [Fact]
     public async Task ExecuteTaskAsync_CancellationRequested_IsHandled()
     {
         // Arrange
@@ -240,7 +238,7 @@ public class AgentOrchestratorTests
         var result = await _orchestrator.ExecuteTaskAsync(userInput);
 
         // Assert
-        Assert.That(result.IsSuccessful, Is.False);
+        Assert.False(result.IsSuccessful);
         Assert.That(result.Content, Does.Contain("キャンセル"));
     }
 }

@@ -1,17 +1,15 @@
-using NUnit.Framework;
+using Xunit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.InMemory;
 using Commanda.Core;
 
 namespace Commanda.Core.Tests;
 
-[TestFixture]
-public class CommandaDbContextTests
+public class CommandaDbContextTests : IDisposable
 {
-    private CommandaDbContext _context = null!;
+    private readonly CommandaDbContext _context;
 
-    [SetUp]
-    public void Setup()
+    public CommandaDbContextTests()
     {
         var options = new DbContextOptionsBuilder<CommandaDbContext>()
             .UseInMemoryDatabase(databaseName: "TestDatabase")
@@ -21,14 +19,13 @@ public class CommandaDbContextTests
         _context.Database.EnsureCreated();
     }
 
-    [TearDown]
-    public void TearDown()
+    public void Dispose()
     {
         _context.Database.EnsureDeleted();
         _context.Dispose();
     }
 
-    [Test]
+    [Fact]
     public async Task CanAddAndRetrieveExecutionLog()
     {
         // Arrange
@@ -49,12 +46,12 @@ public class CommandaDbContextTests
         var retrieved = await _context.ExecutionLogs.FirstOrDefaultAsync(l => l.TaskDescription == "Test task");
 
         // Assert
-        Assert.IsNotNull(retrieved);
-        Assert.AreEqual("Test task", retrieved!.TaskDescription);
-        Assert.AreEqual("Completed", retrieved!.Status);
+        Assert.NotNull(retrieved);
+        Assert.Equal("Test task", retrieved!.TaskDescription);
+        Assert.Equal("Completed", retrieved!.Status);
     }
 
-    [Test]
+    [Fact]
     public async Task CanAddAndRetrieveTaskHistory()
     {
         // Arrange
@@ -74,12 +71,12 @@ public class CommandaDbContextTests
         var retrieved = await _context.TaskHistories.FirstOrDefaultAsync(h => h.SessionId == "session123");
 
         // Assert
-        Assert.IsNotNull(retrieved);
-        Assert.AreEqual("Test input", retrieved!.UserInput);
-        Assert.AreEqual("Completed", retrieved!.Status);
+        Assert.NotNull(retrieved);
+        Assert.Equal("Test input", retrieved!.UserInput);
+        Assert.Equal("Completed", retrieved!.Status);
     }
 
-    [Test]
+    [Fact]
     public async Task CanAddAndRetrieveExtensionInfo()
     {
         // Arrange
@@ -98,13 +95,13 @@ public class CommandaDbContextTests
         var retrieved = await _context.Extensions.FirstOrDefaultAsync(e => e.Name == "TestExtension");
 
         // Assert
-        Assert.IsNotNull(retrieved);
-        Assert.AreEqual("TestExtension", retrieved!.Name);
-        Assert.AreEqual("1.0.0", retrieved!.Version);
-        Assert.IsTrue(retrieved!.IsEnabled);
+        Assert.NotNull(retrieved);
+        Assert.Equal("TestExtension", retrieved!.Name);
+        Assert.Equal("1.0.0", retrieved!.Version);
+        Assert.True(retrieved!.IsEnabled);
     }
 
-    [Test]
+    [Fact]
     public async Task CanAddAndRetrieveLlmProviderConfig()
     {
         // Arrange
@@ -125,13 +122,13 @@ public class CommandaDbContextTests
         var retrieved = await _context.LlmProviders.FirstOrDefaultAsync(p => p.Name == "TestProvider");
 
         // Assert
-        Assert.IsNotNull(retrieved);
-        Assert.AreEqual("TestProvider", retrieved!.Name);
-        Assert.AreEqual("OpenAI", retrieved!.ProviderType);
-        Assert.IsTrue(retrieved!.IsDefault);
+        Assert.NotNull(retrieved);
+        Assert.Equal("TestProvider", retrieved!.Name);
+        Assert.Equal("OpenAI", retrieved!.ProviderType);
+        Assert.True(retrieved!.IsDefault);
     }
 
-    [Test]
+    [Fact]
     public void ExtensionNameMustBeUnique()
     {
         // Arrange

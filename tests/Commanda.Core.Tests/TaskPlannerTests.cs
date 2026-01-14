@@ -1,23 +1,21 @@
-using NUnit.Framework;
+using Xunit;
 using Moq;
 using Commanda.Core;
 
 namespace Commanda.Core.Tests;
 
-[TestFixture]
 public class TaskPlannerTests
 {
-    private Mock<ILlmProviderManager> _llmManagerMock = null!;
-    private TaskPlanner _taskPlanner = null!;
+    private readonly Mock<ILlmProviderManager> _llmManagerMock;
+    private readonly TaskPlanner _taskPlanner;
 
-    [SetUp]
-    public void Setup()
+    public TaskPlannerTests()
     {
         _llmManagerMock = new Mock<ILlmProviderManager>();
         _taskPlanner = new TaskPlanner(_llmManagerMock.Object);
     }
 
-    [Test]
+    [Fact]
     public async Task GeneratePlanAsync_ValidUserInput_ReturnsExecutionPlan()
     {
         // Arrange
@@ -44,13 +42,13 @@ public class TaskPlannerTests
         var result = await _taskPlanner.GeneratePlanAsync(context);
 
         // Assert
-        Assert.IsNotNull(result);
-        Assert.AreEqual("ファイルコピー計画", result.Description);
-        Assert.AreEqual(1, result.Steps.Count);
-        Assert.AreEqual("copy_file", result.Steps[0].ToolName);
+        Assert.NotNull(result);
+        Assert.Equal("ファイルコピー計画", result.Description);
+        Assert.Equal(1, result.Steps.Count);
+        Assert.Equal("copy_file", result.Steps[0].ToolName);
     }
 
-    [Test]
+    [Fact]
     public async Task GeneratePlanAsync_WithFeedback_IncludesFeedbackInPrompt()
     {
         // Arrange
@@ -78,11 +76,11 @@ public class TaskPlannerTests
         var result = await _taskPlanner.GeneratePlanAsync(context);
 
         // Assert
-        Assert.IsNotNull(result);
-        Assert.AreEqual("修正されたファイルコピー計画", result.Description);
+        Assert.NotNull(result);
+        Assert.Equal("修正されたファイルコピー計画", result.Description);
     }
 
-    [Test]
+    [Fact]
     public void GeneratePlanAsync_InvalidJson_ThrowsException()
     {
         // Arrange
