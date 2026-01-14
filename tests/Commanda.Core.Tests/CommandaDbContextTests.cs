@@ -129,7 +129,7 @@ public class CommandaDbContextTests : IDisposable
     }
 
     [Fact]
-    public void ExtensionNameMustBeUnique()
+    public async Task ExtensionNameMustBeUnique()
     {
         // Arrange
         var extension1 = new ExtensionInfo

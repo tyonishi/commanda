@@ -81,7 +81,7 @@ public class TaskPlannerTests
     }
 
     [Fact]
-    public void GeneratePlanAsync_InvalidJson_ThrowsException()
+    public async Task GeneratePlanAsync_InvalidJson_ThrowsException()
     {
         // Arrange
         var context = new AgentContext { UserInput = "無効なリクエスト" };
