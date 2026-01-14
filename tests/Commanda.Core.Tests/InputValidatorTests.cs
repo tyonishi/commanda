@@ -1,9 +1,8 @@
-using NUnit.Framework;
+using Xunit;
 using Commanda.Core;
 
 namespace Commanda.Core.Tests;
 
-[TestFixture]
 public class InputValidatorTests
 {
     private readonly InputValidator _validator;
@@ -23,8 +22,8 @@ public class InputValidatorTests
         var result = _validator.ValidateUserInput(input);
 
         // Assert
-        Assert.IsTrue(result.IsValid);
-        Assert.IsNull(result.ErrorMessage);
+        Assert.True(result.IsValid);
+        Assert.Null(result.ErrorMessage);
     }
 
     [Fact]
@@ -37,8 +36,8 @@ public class InputValidatorTests
         var result = _validator.ValidateUserInput(input);
 
         // Assert
-        Assert.IsFalse(result.IsValid);
-        Assert.AreEqual("入力が空です", result.ErrorMessage);
+        Assert.False(result.IsValid);
+        Assert.Equal("入力が空です", result.ErrorMessage);
     }
 
     [Fact]
@@ -51,8 +50,8 @@ public class InputValidatorTests
         var result = _validator.ValidateUserInput(input);
 
         // Assert
-        Assert.IsFalse(result.IsValid);
-        Assert.AreEqual("危険なコマンドが含まれています", result.ErrorMessage);
+        Assert.False(result.IsValid);
+        Assert.Equal("危険なコマンドが含まれています", result.ErrorMessage);
     }
 
     [Fact]
@@ -65,8 +64,8 @@ public class InputValidatorTests
         var result = _validator.ValidateUserInput(input);
 
         // Assert
-        Assert.IsFalse(result.IsValid);
-        Assert.AreEqual("入力が長すぎます（最大10000文字）", result.ErrorMessage);
+        Assert.False(result.IsValid);
+        Assert.Equal("入力が長すぎます（最大10000文字）", result.ErrorMessage);
     }
 
     [Fact]
@@ -79,9 +78,9 @@ public class InputValidatorTests
         var result = _validator.ValidateUserInput(input);
 
         // Assert
-        Assert.IsTrue(result.IsValid);
-        Assert.AreEqual(1, result.Warnings.Count());
-        Assert.AreEqual("SQLインジェクションの疑いがあります", result.Warnings[0]);
+        Assert.True(result.IsValid);
+        Assert.Equal(1, result.Warnings.Count());
+        Assert.Equal("SQLインジェクションの疑いがあります", result.Warnings[0]);
     }
 
     [Fact]
@@ -94,8 +93,8 @@ public class InputValidatorTests
         var result = _validator.ValidateFilePath(path);
 
         // Assert
-        Assert.IsTrue(result.IsValid);
-        Assert.IsNull(result.ErrorMessage);
+        Assert.True(result.IsValid);
+        Assert.Null(result.ErrorMessage);
     }
 
     [Fact]
@@ -108,8 +107,8 @@ public class InputValidatorTests
         var result = _validator.ValidateFilePath(path);
 
         // Assert
-        Assert.IsFalse(result.IsValid);
-        Assert.AreEqual("パストラバーサル攻撃の可能性があります", result.ErrorMessage);
+        Assert.False(result.IsValid);
+        Assert.Equal("パストラバーサル攻撃の可能性があります", result.ErrorMessage);
     }
 
     [Fact]
@@ -122,7 +121,7 @@ public class InputValidatorTests
         var result = _validator.ValidateFilePath(path);
 
         // Assert
-        Assert.IsFalse(result.IsValid);
-        Assert.AreEqual("危険なファイルパスです", result.ErrorMessage);
+        Assert.False(result.IsValid);
+        Assert.Equal("危険なファイルパスです", result.ErrorMessage);
     }
 }
