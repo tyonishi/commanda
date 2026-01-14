@@ -1,6 +1,8 @@
 using Xunit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.InMemory;
+using Microsoft.EntityFrameworkCore.Sqlite;
+using Microsoft.Data.Sqlite;
 using Commanda.Core;
 
 namespace Commanda.Core.Tests;
@@ -8,11 +10,15 @@ namespace Commanda.Core.Tests;
 public class CommandaDbContextTests : IDisposable
 {
     private readonly CommandaDbContext _context;
+    private readonly SqliteConnection _connection;
 
     public CommandaDbContextTests()
     {
+        _connection = new SqliteConnection("DataSource=:memory:");
+        _connection.Open();
+
         var options = new DbContextOptionsBuilder<CommandaDbContext>()
-            .UseInMemoryDatabase(databaseName: "TestDatabase")
+            .UseSqlite(_connection)
             .Options;
 
         _context = new CommandaDbContext(options);
@@ -23,6 +29,7 @@ public class CommandaDbContextTests : IDisposable
     {
         _context.Database.EnsureDeleted();
         _context.Dispose();
+        _connection.Close();
     }
 
     [Fact]
@@ -148,8 +155,9 @@ public class CommandaDbContextTests : IDisposable
 
         // Act & Assert
         _context.Extensions.Add(extension1);
-        _context.Extensions.Add(extension2);
+        await _context.SaveChangesAsync();
 
+        _context.Extensions.Add(extension2);
         await Assert.ThrowsAsync<DbUpdateException>(async () => await _context.SaveChangesAsync());
     }
 }

@@ -1,5 +1,6 @@
 using System.IO;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Microsoft.Extensions.Logging;
 
 namespace Commanda.Core;
@@ -271,6 +272,7 @@ public class StateSnapshot
     /// <summary>
     /// 現在の実行状態
     /// </summary>
+    [JsonConverter(typeof(JsonStringEnumConverter))]
     public ExecutionStatus Status { get; set; }
 
     /// <summary>

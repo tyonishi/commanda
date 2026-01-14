@@ -55,12 +55,12 @@ public class InputValidator
 
     // 危険なファイルパスパターンの正規表現
     private static readonly Regex DangerousFilePaths = new Regex(
-        @"(?i)(?:\.\.|\\|/(?:windows|system32|program\s+files|users|documents\s+and\s+settings|all\s+users))",
+        @"(?i)(?:\.\.|[/\\](?:windows|system32|program\s+files|users|documents\s+and\s+settings|all\s+users))",
         RegexOptions.Compiled);
 
     // SQLインジェクションのパターン
     private static readonly Regex SqlInjectionPatterns = new Regex(
-        @"(?i)(?:\b(?:select|insert|update|delete|drop|create|alter|exec|execute)\b.*?;)",
+        @"(?i)(?:\b(?:select|insert|update|delete|drop|create|alter|exec|execute)\b.*)",
         RegexOptions.Compiled);
 
     /// <summary>
@@ -128,16 +128,16 @@ public class InputValidator
             return ValidationResult.Invalid("ファイルパスが長すぎます");
         }
 
-        // 危険なパスのチェック
-        if (DangerousFilePaths.IsMatch(path))
-        {
-            return ValidationResult.Invalid("危険なファイルパスです");
-        }
-
         // パストラバーサルのチェック
         if (path.Contains("..") || path.Contains("\\..") || path.Contains("/.."))
         {
             return ValidationResult.Invalid("パストラバーサル攻撃の可能性があります");
+        }
+
+        // 危険なパスのチェック
+        if (DangerousFilePaths.IsMatch(path))
+        {
+            return ValidationResult.Invalid("危険なファイルパスです");
         }
 
         return ValidationResult.Valid();
