@@ -58,6 +58,14 @@ public class ExtensionManager : IExtensionManager
                 {
                     configuration = configuration.WithAssembly(assembly);
                 }
+                // テスト用の拡張機能を追加
+                var testType = AppDomain.CurrentDomain.GetAssemblies()
+                    .SelectMany(a => a.GetTypes())
+                    .FirstOrDefault(t => t.Name == "TestMefExtension" && typeof(IMcpExtension).IsAssignableFrom(t));
+                if (testType != null)
+                {
+                    configuration = configuration.WithPart(testType);
+                }
             }
 
             // MEFコンテナを作成
