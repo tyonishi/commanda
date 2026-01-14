@@ -25,6 +25,19 @@ jobs:
       run: dotnet restore
       # Critical decision: Restore all project dependencies before building to ensure no missing packages
 
+    - name: Check for vulnerable packages
+      run: |
+        # Check main projects for vulnerable NuGet packages
+        echo "Checking Commanda.csproj for vulnerabilities:"
+        dotnet list package --vulnerable --project src/Commanda/Commanda.csproj
+        echo "Checking Commanda.Core.csproj for vulnerabilities:"
+        dotnet list package --vulnerable --project src/Commanda.Core/Commanda.Core.csproj
+        echo "Checking Commanda.Mcp.csproj for vulnerabilities:"
+        dotnet list package --vulnerable --project src/Commanda.Mcp/Commanda.Mcp.csproj
+        echo "Checking Commanda.Extensions.csproj for vulnerabilities:"
+        dotnet list package --vulnerable --project src/Commanda.Extensions/Commanda.Extensions.csproj
+      # Critical decision: Run vulnerability check on all main projects to identify security issues in dependencies; fail pipeline if vulnerabilities found
+
     - name: Build solution
       run: dotnet build --configuration Release --no-restore
       # Critical decision: Build in Release mode for production-ready binaries; --no-restore skips redundant restore step
