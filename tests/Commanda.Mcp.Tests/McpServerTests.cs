@@ -1,4 +1,4 @@
-using NUnit.Framework;
+using Xunit;
 using Moq;
 using Commanda.Core;
 using Commanda.Mcp;
@@ -6,20 +6,39 @@ using Commanda.Extensions;
 
 namespace Commanda.Mcp.Tests;
 
-[TestFixture]
-public class McpServerTests
+public class McpServerTests : IDisposable
 {
-    private Mock<IExtensionManager> _extensionManagerMock = null!;
-    private McpServer _mcpServer = null!;
+    private readonly Mock<IExtensionManager> _extensionManagerMock;
+    private readonly McpServer _mcpServer;
+    private readonly List<string> _tempFiles = new();
 
-    [SetUp]
-    public void Setup()
+    public McpServerTests()
     {
         _extensionManagerMock = new Mock<IExtensionManager>();
         _mcpServer = new McpServer(_extensionManagerMock.Object);
     }
 
-    [Test]
+    public void Dispose()
+    {
+        // Cleanup temporary files
+        foreach (var file in _tempFiles)
+        {
+            try
+            {
+                if (File.Exists(file))
+                {
+                    File.Delete(file);
+                }
+            }
+            catch
+            {
+                // Ignore cleanup errors
+            }
+        }
+        _tempFiles.Clear();
+    }
+
+    [Fact]
     public async Task InitializeAsync_LoadsExtensions()
     {
         // Arrange
@@ -33,7 +52,7 @@ public class McpServerTests
         _extensionManagerMock.Verify(m => m.LoadExtensionsAsync(), Times.Once);
     }
 
-    [Test]
+    [Fact]
     public async Task GetAvailableToolsAsync_ReturnsBuiltInTools()
     {
         // Arrange
@@ -43,17 +62,18 @@ public class McpServerTests
         var tools = await _mcpServer.GetAvailableToolsAsync();
 
         // Assert
-        Assert.That(tools, Does.Contain("read_file"));
-        Assert.That(tools, Does.Contain("write_file"));
-        Assert.That(tools, Does.Contain("list_directory"));
+        Assert.Contains("read_file", tools);
+        Assert.Contains("write_file", tools);
+        Assert.Contains("list_directory", tools);
     }
 
-    [Test]
+    [Fact]
     public async Task ExecuteToolAsync_ReadFile_Success()
     {
         // Arrange
         await _mcpServer.InitializeAsync();
         var testFile = Path.GetTempFileName();
+        _tempFiles.Add(testFile);
         var testContent = "Test file content";
         await File.WriteAllTextAsync(testFile, testContent);
 
@@ -66,14 +86,11 @@ public class McpServerTests
         var result = await _mcpServer.ExecuteToolAsync("read_file", arguments, TimeSpan.FromSeconds(30));
 
         // Assert
-        Assert.That(result.IsSuccessful, Is.True);
-        Assert.That(result.Output, Is.EqualTo(testContent));
-
-        // Cleanup
-        File.Delete(testFile);
+        Assert.True(result.IsSuccessful);
+        Assert.Equal(testContent, result.Output);
     }
 
-    [Test]
+    [Fact]
     public async Task ExecuteToolAsync_ReadFile_FileNotFound_ReturnsError()
     {
         // Arrange
@@ -87,16 +104,17 @@ public class McpServerTests
         var result = await _mcpServer.ExecuteToolAsync("read_file", arguments, TimeSpan.FromSeconds(30));
 
         // Assert
-        Assert.That(result.IsSuccessful, Is.False);
-        Assert.That(result.Error, Does.Contain("ファイル読み込みエラー"));
+        Assert.False(result.IsSuccessful);
+        Assert.Contains("ファイル読み込みエラー", result.Error);
     }
 
-    [Test]
+    [Fact]
     public async Task ExecuteToolAsync_WriteFile_Success()
     {
         // Arrange
         await _mcpServer.InitializeAsync();
         var testFile = Path.GetTempFileName();
+        _tempFiles.Add(testFile);
         var testContent = "Test content to write";
 
         var arguments = new Dictionary<string, object>
@@ -109,18 +127,15 @@ public class McpServerTests
         var result = await _mcpServer.ExecuteToolAsync("write_file", arguments, TimeSpan.FromSeconds(30));
 
         // Assert
-        Assert.That(result.IsSuccessful, Is.True);
-        Assert.That(result.Output, Is.EqualTo("ファイルが正常に書き込まれました"));
+        Assert.True(result.IsSuccessful);
+        Assert.Equal("ファイルが正常に書き込まれました", result.Output);
 
         // Verify file content
         var actualContent = await File.ReadAllTextAsync(testFile);
-        Assert.That(actualContent, Is.EqualTo(testContent));
-
-        // Cleanup
-        File.Delete(testFile);
+        Assert.Equal(testContent, actualContent);
     }
 
-    [Test]
+    [Fact]
     public async Task ExecuteToolAsync_WriteFile_MissingParameters_ReturnsError()
     {
         // Arrange
@@ -131,11 +146,11 @@ public class McpServerTests
         var result = await _mcpServer.ExecuteToolAsync("write_file", arguments, TimeSpan.FromSeconds(30));
 
         // Assert
-        Assert.That(result.IsSuccessful, Is.False);
-        Assert.That(result.Error, Does.Contain("pathパラメータが必要です"));
+        Assert.False(result.IsSuccessful);
+        Assert.Contains("pathパラメータが必要です", result.Error);
     }
 
-    [Test]
+    [Fact]
     public async Task ExecuteToolAsync_UnknownTool_ReturnsError()
     {
         // Arrange
@@ -146,7 +161,7 @@ public class McpServerTests
         var result = await _mcpServer.ExecuteToolAsync("unknown_tool", arguments, TimeSpan.FromSeconds(30));
 
         // Assert
-        Assert.That(result.IsSuccessful, Is.False);
-        Assert.That(result.Error, Does.Contain("見つかりません"));
+        Assert.False(result.IsSuccessful);
+        Assert.Contains("見つかりません", result.Error);
     }
 }

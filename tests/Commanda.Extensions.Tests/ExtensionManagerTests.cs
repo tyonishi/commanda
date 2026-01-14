@@ -1,4 +1,4 @@
-using NUnit.Framework;
+using Xunit;
 using Moq;
 using Commanda.Core;
 using Commanda.Extensions;
@@ -7,14 +7,12 @@ using System.Composition.Hosting;
 
 namespace Commanda.Extensions.Tests;
 
-[TestFixture]
 public class ExtensionManagerTests
 {
-    private ExtensionManager _extensionManager = null!;
-    private Mock<IMcpExtension> _mockExtension = null!;
+    private readonly ExtensionManager _extensionManager;
+    private readonly Mock<IMcpExtension> _mockExtension;
 
-    [SetUp]
-    public void Setup()
+    public ExtensionManagerTests()
     {
         _extensionManager = new ExtensionManager();
         _mockExtension = new Mock<IMcpExtension>();
@@ -23,7 +21,7 @@ public class ExtensionManagerTests
         _mockExtension.Setup(e => e.ToolTypes).Returns(new[] { typeof(TestTool) });
     }
 
-    [Test]
+    [Fact]
     public async Task LoadExtensionsAsync_CompletesSuccessfully()
     {
         // Act
@@ -31,30 +29,30 @@ public class ExtensionManagerTests
 
         // Assert
         // 現在の実装では何もロードしないので、例外が発生しないことを確認
-        Assert.Pass();
+        Assert.True(true);
     }
 
-    [Test]
+    [Fact]
     public async Task GetLoadedExtensionsAsync_InitiallyEmpty()
     {
         // Act
         var extensions = await _extensionManager.GetLoadedExtensionsAsync();
 
         // Assert
-        Assert.That(extensions, Is.Empty);
+        Assert.Empty(extensions);
     }
 
-    [Test]
+    [Fact]
     public async Task RegisterExtensionAsync_NewExtension_ReturnsTrue()
     {
         // Act
         var result = await _extensionManager.RegisterExtensionAsync(_mockExtension.Object);
 
         // Assert
-        Assert.That(result, Is.True);
+        Assert.True(result);
     }
 
-    [Test]
+    [Fact]
     public async Task RegisterExtensionAsync_ExistingExtension_ReturnsFalse()
     {
         // Arrange
@@ -64,10 +62,10 @@ public class ExtensionManagerTests
         var result = await _extensionManager.RegisterExtensionAsync(_mockExtension.Object);
 
         // Assert
-        Assert.That(result, Is.False);
+        Assert.False(result);
     }
 
-    [Test]
+    [Fact]
     public async Task GetLoadedExtensionsAsync_AfterRegistration_ContainsExtension()
     {
         // Arrange
@@ -77,11 +75,11 @@ public class ExtensionManagerTests
         var extensions = await _extensionManager.GetLoadedExtensionsAsync();
 
         // Assert
-        Assert.That(extensions.Count(), Is.EqualTo(1));
-        Assert.That(extensions.First().Name, Is.EqualTo("TestExtension"));
+        Assert.Single(extensions);
+        Assert.Equal("TestExtension", extensions.First().Name);
     }
 
-    [Test]
+    [Fact]
     public async Task UnregisterExtensionAsync_ExistingExtension_ReturnsTrue()
     {
         // Arrange
@@ -91,24 +89,24 @@ public class ExtensionManagerTests
         var result = await _extensionManager.UnregisterExtensionAsync("TestExtension");
 
         // Assert
-        Assert.That(result, Is.True);
+        Assert.True(result);
 
         // Verify removed
         var extensions = await _extensionManager.GetLoadedExtensionsAsync();
-        Assert.That(extensions, Is.Empty);
+        Assert.Empty(extensions);
     }
 
-    [Test]
+    [Fact]
     public async Task UnregisterExtensionAsync_NonExistingExtension_ReturnsFalse()
     {
         // Act
         var result = await _extensionManager.UnregisterExtensionAsync("NonExistingExtension");
 
         // Assert
-        Assert.That(result, Is.False);
+        Assert.False(result);
     }
 
-    [Test]
+    [Fact]
     public async Task ReloadExtensionsAsync_ClearsAndReloads()
     {
         // Arrange
@@ -120,11 +118,11 @@ public class ExtensionManagerTests
         // Assert
         // リロードにより拡張機能がクリアされ、再ロードされる
         var extensions = await _extensionManager.GetLoadedExtensionsAsync();
-        Assert.That(extensions, Is.Not.Empty);
-        Assert.That(extensions.Any(e => e.Name == "TestMefExtension"), Is.True);
+        Assert.NotEmpty(extensions);
+        Assert.Contains(extensions, e => e.Name == "TestMefExtension");
     }
 
-    [Test]
+    [Fact]
     public async Task LoadExtensionsWithMefAsync_LoadsExportedExtensions()
     {
         // Arrange - Create MEF container with test extension
@@ -142,7 +140,7 @@ public class ExtensionManagerTests
 
         // Assert - Should load MEF exported extensions
         var extensions = await extensionManager.GetLoadedExtensionsAsync();
-        Assert.That(extensions.Any(e => e.Name == "TestMefExtension"), Is.True);
+        Assert.Contains(extensions, e => e.Name == "TestMefExtension");
     }
 
     // MEF exported test extension
