@@ -102,35 +102,147 @@ public class MessageViewModel : INotifyPropertyChanged
 
 #### 1.1.2 UI仕様
 ```xaml
-<!-- MessageTemplate.xaml -->
-<DataTemplate x:Key="MessageTemplate">
-    <Border Margin="16,8" Background="White" CornerRadius="8" 
-           BorderBrush="#E0E0E0" BorderThickness="1" Padding="12" MaxWidth="600">
-        <Grid>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
-            
-            <!-- アバター -->
-            <Border Grid.Column="0" Width="32" Height="32" 
-                   CornerRadius="16" Margin="0,0,12,0"
-                   Background="{Binding SenderInitial, Converter={StaticResource InitialToColorConverter}}">
-                <TextBlock Text="{Binding SenderInitial}" 
-                          HorizontalAlignment="Center" VerticalAlignment="Center"
-                          FontWeight="Bold" Foreground="White"/>
-            </Border>
-            
-            <!-- メッセージ内容 -->
-            <StackPanel Grid.Column="1">
-                <TextBlock Text="{Binding SenderName}" FontWeight="SemiBold" Margin="0,0,0,4"/>
-                <local:MarkdownTextBlock Text="{Binding Content}" FontSize="14" LineHeight="1.4"/>
-                <TextBlock Text="{Binding Timestamp, StringFormat='{}{0:HH:mm}'}" 
-                          FontSize="11" Foreground="#666666" Margin="0,4,0,0"/>
-            </StackPanel>
-        </Grid>
-    </Border>
-</DataTemplate>
+<!-- MainWindow.xaml -->
+<Window x:Class="Commanda.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Commanda"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        mc:Ignorable="d"
+        Title="Commanda - AI PC Automation" Height="600" Width="800"
+        WindowStartupLocation="CenterScreen"
+        TextElement.FontWeight="Regular"
+        TextElement.FontSize="13"
+        TextOptions.TextFormattingMode="Ideal"
+        TextOptions.TextRenderingMode="Auto">
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+        <local:InitialToColorConverter x:Key="InitialToColorConverter"/>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- メッセージリスト -->
+        <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto" Margin="16">
+            <ItemsControl ItemsSource="{Binding Messages}" Margin="0,0,0,16">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <materialDesign:Card Margin="0,8" Padding="12" MaxWidth="600"
+                                              Background="{DynamicResource MaterialDesignPaper}"
+                                              UniformCornerRadius="8">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <!-- アバター -->
+                                <Border Grid.Column="0" Width="32" Height="32"
+                                        CornerRadius="16" Margin="0,0,12,0"
+                                        Background="{Binding SenderInitial, Converter={StaticResource InitialToColorConverter}}">
+                                    <TextBlock Text="{Binding SenderInitial}"
+                                               HorizontalAlignment="Center" VerticalAlignment="Center"
+                                               FontWeight="Bold" Foreground="White"/>
+                                </Border>
+
+                                <!-- メッセージ内容 -->
+                                <StackPanel Grid.Column="1">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+
+                                        <TextBlock Grid.Column="0" Text="{Binding SenderName}"
+                                                   FontSize="16" FontWeight="SemiBold"
+                                                   Margin="0,0,0,4"/>
+
+                                        <!-- ステータスアイコン -->
+                                        <TextBlock Grid.Column="1" Text="✓" Foreground="Green" Margin="8,0,0,0"
+                                                   Visibility="{Binding IsSuccess, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                                        <TextBlock Grid.Column="1" Text="⚠" Foreground="Red" Margin="8,0,0,0"
+                                                   Visibility="{Binding IsSuccess, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=inverse}"/>
+                                    </Grid>
+
+                                    <local:MarkdownTextBlock MarkdownText="{Binding Content}"
+                                                             FontSize="14" LineHeight="1.4"
+                                                             Margin="0,0,0,8"/>
+
+                                    <!-- 実行詳細 -->
+                                    <StackPanel Orientation="Horizontal" Margin="0,4,0,0"
+                                                Visibility="{Binding IsSystemMessage, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=inverse}">
+                                        <TextBlock Text="{Binding Timestamp, StringFormat='{}{0:HH:mm}'}"
+                                                   FontSize="11" Foreground="#666666"/>
+                                        <TextBlock Text=" • " FontSize="11" Foreground="#666666"
+                                                   Visibility="{Binding Duration, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                                        <TextBlock Text="{Binding Duration, StringFormat='{}{0:mm\\:ss\\.fff}'}"
+                                                   FontSize="11" Foreground="#666666"
+                                                   Visibility="{Binding Duration, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                                    </StackPanel>
+
+                                    <!-- 警告メッセージ -->
+                                    <ItemsControl ItemsSource="{Binding Warnings}" Margin="0,8,0,0">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Border Background="Orange" CornerRadius="12" Padding="8,4"
+                                                        Margin="0,0,8,4">
+                                                    <TextBlock Text="{Binding}" Foreground="White" FontSize="11"/>
+                                                </Border>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <WrapPanel/>
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                    </ItemsControl>
+                                </StackPanel>
+                            </Grid>
+                        </materialDesign:Card>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+
+        <!-- 入力エリア -->
+        <materialDesign:Card Grid.Row="1" Margin="16,0,16,16" Padding="16"
+                             Background="{DynamicResource MaterialDesignCardBackground}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- テキスト入力 -->
+                <TextBox Grid.Column="0" Text="{Binding CurrentMessage, UpdateSourceTrigger=PropertyChanged}"
+                         AcceptsReturn="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto"
+                         MinHeight="48" Margin="0,0,12,0" Padding="8"
+                         IsEnabled="{Binding IsExecuting, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=inverse}"/>
+
+                <!-- 送信ボタン -->
+                <Button Grid.Column="1" Content="送信"
+                        Command="{Binding SendCommand}"
+                        Width="80" Height="48"
+                        ToolTip="送信"
+                        IsEnabled="{Binding IsExecuting, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=inverse}"/>
+
+                <!-- 実行中インジケーター -->
+                <StackPanel Grid.Column="0" Grid.ColumnSpan="2"
+                           HorizontalAlignment="Center" VerticalAlignment="Center"
+                           Visibility="{Binding IsExecuting, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <TextBlock Text="⏳" FontSize="24" Margin="0,0,0,8"/>
+                    <TextBlock Text="実行中..." FontSize="12" Foreground="#666666"/>
+                </StackPanel>
+            </Grid>
+        </materialDesign:Card>
+    </Grid>
+</Window>
 ```
 
 ### 1.2 Agent Orchestrator
@@ -169,77 +281,194 @@ public enum ExecutionStatus
 ```csharp
 public class AgentOrchestrator : IAgentOrchestrator
 {
-    private readonly ITaskPlanner _planner;
-    private readonly IExecutionMonitor _monitor;
+    private readonly ITaskPlanner _taskPlanner;
+    private readonly IExecutionMonitor _executionMonitor;
     private readonly IStateManager _stateManager;
+    private readonly ILlmProviderManager _llmManager;
     private readonly IMcpServer _mcpServer;
+    private readonly InputValidator _inputValidator;
+    private readonly ILogger<AgentOrchestrator> _logger;
     private readonly CancellationTokenSource _cancellationSource;
-    
-    private AgentContext _currentContext;
-    
+    private AgentContext? _currentContext;
+
     public AgentOrchestrator(
-        ITaskPlanner planner,
-        IExecutionMonitor monitor,
+        ITaskPlanner taskPlanner,
+        IExecutionMonitor executionMonitor,
         IStateManager stateManager,
-        IMcpServer mcpServer)
+        ILlmProviderManager llmManager,
+        IMcpServer mcpServer,
+        InputValidator inputValidator,
+        ILogger<AgentOrchestrator> logger)
     {
-        _planner = planner;
-        _monitor = monitor;
-        _stateManager = stateManager;
-        _mcpServer = mcpServer;
+        _taskPlanner = taskPlanner ?? throw new ArgumentNullException(nameof(taskPlanner));
+        _executionMonitor = executionMonitor ?? throw new ArgumentNullException(nameof(executionMonitor));
+        _stateManager = stateManager ?? throw new ArgumentNullException(nameof(stateManager));
+        _llmManager = llmManager ?? throw new ArgumentNullException(nameof(llmManager));
+        _mcpServer = mcpServer ?? throw new ArgumentNullException(nameof(mcpServer));
+        _inputValidator = inputValidator ?? throw new ArgumentNullException(nameof(inputValidator));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _cancellationSource = new CancellationTokenSource();
     }
     
     public async Task<ExecutionResult> ExecuteTaskAsync(string userInput)
     {
-        _currentContext = new AgentContext { UserInput = userInput };
         var startTime = DateTime.UtcNow;
-        
+        var sessionId = GenerateSessionId(userInput, startTime);
+
         try
         {
-            while (!_currentContext.IsCompleted && !_currentContext.IsCancelled)
+            _logger.LogInformation("新しいタスク実行を開始します: {SessionId}", sessionId);
+
+            // 入力検証
+            var validationResult = _inputValidator.ValidateUserInput(userInput);
+            if (!validationResult.IsValid)
             {
-                // Planning Phase
-                _currentContext.Status = ExecutionStatus.Planning;
-                var plan = await _planner.GeneratePlanAsync(_currentContext, _cancellationSource.Token);
-                _currentContext.CurrentPlan = plan;
-                
-                // Execution Phase
-                _currentContext.Status = ExecutionStatus.Executing;
-                var executionResult = await ExecutePlanAsync(plan, _cancellationSource.Token);
-                
-                // Evaluation Phase
-                _currentContext.Status = ExecutionStatus.Evaluating;
-                var evaluation = await _monitor.EvaluateResultAsync(executionResult, _currentContext);
-                
-                if (evaluation.ShouldRetry)
+                _logger.LogWarning("入力検証エラー: {Error}", validationResult.ErrorMessage);
+                return new ExecutionResult
                 {
-                    _currentContext.AddFeedback(evaluation.Feedback);
-                    continue;
-                }
-                
-                if (evaluation.IsSuccessful)
+                    Content = $"入力検証エラー: {validationResult.ErrorMessage}",
+                    IsSuccessful = false,
+                    Duration = DateTime.UtcNow - startTime
+                };
+            }
+
+            // 警告がある場合はログに記録
+            if (validationResult.Warnings.Any())
+            {
+                foreach (var warning in validationResult.Warnings)
                 {
-                    _currentContext.MarkCompleted();
-                }
-                else
-                {
-                    _currentContext.MarkCancelled(evaluation.Reason);
+                    _logger.LogWarning("入力検証警告: {Warning}", warning);
                 }
             }
-            
+
+            // 新しいコンテキストを作成
+            _currentContext = new AgentContext { UserInput = userInput };
+            _currentContext.Status = ExecutionStatus.Planning;
+
+            // 状態を保存
+            await _stateManager.SaveStateAsync(_currentContext);
+
+            // ReActループ: Planning → Execution → Evaluation → Feedback
+            while (!_currentContext.IsCompleted && !_currentContext.IsCancelled)
+            {
+                _cancellationSource.Token.ThrowIfCancellationRequested();
+
+                try
+                {
+                    // Planning Phase
+                    _logger.LogInformation("Planningフェーズを開始します");
+                    var plan = await _taskPlanner.GeneratePlanAsync(_currentContext, _cancellationSource.Token);
+                    _currentContext.CurrentPlan = plan;
+                    _currentContext.Status = ExecutionStatus.Planning;
+
+                    // 状態を保存
+                    await _stateManager.SaveStateAsync(_currentContext);
+
+                    // Execution Phase
+                    _logger.LogInformation("Executionフェーズを開始します: {StepCount}ステップ",
+                        plan?.Steps.Count ?? 0);
+                    _currentContext.Status = ExecutionStatus.Executing;
+                    await _stateManager.SaveStateAsync(_currentContext);
+
+                    var executionResult = await ExecutePlanAsync(plan, _cancellationSource.Token);
+
+                    // Evaluation Phase
+                    _logger.LogInformation("Evaluationフェーズを開始します");
+                    _currentContext.Status = ExecutionStatus.Evaluating;
+                    await _stateManager.SaveStateAsync(_currentContext);
+
+                    var evaluation = await _executionMonitor.EvaluateResultAsync(executionResult, _currentContext);
+
+                    if (evaluation.ShouldRetry)
+                    {
+                        _logger.LogInformation("リトライを決定しました: {Feedback}", evaluation.Feedback);
+                        _currentContext.AddFeedback(evaluation.Feedback);
+
+                        // 状態を保存
+                        await _stateManager.SaveStateAsync(_currentContext);
+
+                        // 次のイテレーションへ
+                        continue;
+                    }
+                    else if (evaluation.IsSuccessful)
+                    {
+                        _logger.LogInformation("タスクが正常に完了しました");
+                        _currentContext.MarkCompleted();
+
+                        return new ExecutionResult
+                        {
+                            Content = executionResult.Content,
+                            IsSuccessful = true,
+                            Duration = DateTime.UtcNow - startTime,
+                            StepsExecuted = _currentContext.ExecutionHistory.Count
+                        };
+                    }
+                    else
+                    {
+                        _logger.LogWarning("タスクが失敗しました: {Reason}", evaluation.Reason);
+                        _currentContext.MarkCancelled(evaluation.Reason);
+
+                        return new ExecutionResult
+                        {
+                            Content = $"タスクが失敗しました: {evaluation.Reason}",
+                            IsSuccessful = false,
+                            Duration = DateTime.UtcNow - startTime,
+                            StepsExecuted = _currentContext.ExecutionHistory.Count
+                        };
+                    }
+                }
+                catch (OperationCanceledException)
+                {
+                    _logger.LogInformation("実行がキャンセルされました");
+                    _currentContext.MarkCancelled("ユーザーによるキャンセル");
+                    throw;
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "実行ループ内で例外が発生しました");
+
+                    // エラーを評価してリトライ判断
+                    var errorResult = new ExecutionResult
+                    {
+                        Content = ex.Message,
+                        IsSuccessful = false,
+                        Error = ex.Message,
+                        Duration = DateTime.UtcNow - startTime,
+                        StepsExecuted = _currentContext.ExecutionHistory.Count
+                    };
+
+                    var evaluation = await _executionMonitor.EvaluateResultAsync(errorResult, _currentContext);
+
+                    if (evaluation.ShouldRetry)
+                    {
+                        _logger.LogInformation("エラー後もリトライを決定しました: {Feedback}", evaluation.Feedback);
+                        _currentContext.AddFeedback($"エラーが発生しました: {ex.Message}. {evaluation.Feedback}");
+
+                        // 状態を保存
+                        await _stateManager.SaveStateAsync(_currentContext);
+
+                        continue;
+                    }
+                    else
+                    {
+                        _currentContext.MarkCancelled($"エラー: {ex.Message}");
+                        throw;
+                    }
+                }
+            }
+
+            // ループ終了時の最終結果
             return new ExecutionResult
             {
                 Content = _currentContext.GetFinalResponse(),
                 IsSuccessful = _currentContext.IsCompleted,
-                Warnings = _currentContext.GetWarnings(),
                 Duration = DateTime.UtcNow - startTime,
                 StepsExecuted = _currentContext.ExecutionHistory.Count
             };
         }
         catch (OperationCanceledException)
         {
-            _currentContext.MarkCancelled("ユーザーによるキャンセル");
+            _logger.LogInformation("タスク実行がキャンセルされました: {SessionId}", sessionId);
             return new ExecutionResult
             {
                 Content = "実行がキャンセルされました。",
@@ -249,65 +478,109 @@ public class AgentOrchestrator : IAgentOrchestrator
         }
         catch (Exception ex)
         {
-            _currentContext.MarkCancelled($"予期しないエラー: {ex.Message}");
+            _logger.LogError(ex, "タスク実行中に予期しないエラーが発生しました: {SessionId}", sessionId);
             return new ExecutionResult
             {
-                Content = $"実行中にエラーが発生しました: {ex.Message}",
+                Content = $"予期しないエラーが発生しました: {ex.Message}",
                 IsSuccessful = false,
                 Duration = DateTime.UtcNow - startTime
             };
         }
+        finally
+        {
+            // 最終状態を保存
+            if (_currentContext != null)
+            {
+                await _stateManager.SaveStateAsync(_currentContext);
+            }
+        }
     }
     
-    private async Task<ExecutionResult> ExecutePlanAsync(ExecutionPlan plan, CancellationToken token)
+    private async Task<ExecutionResult> ExecutePlanAsync(ExecutionPlan? plan, CancellationToken token)
     {
-        var results = new List<StepExecutionResult>();
-        
+        if (plan == null || plan.Steps.Count == 0)
+        {
+            return new ExecutionResult
+            {
+                Content = "実行するステップがありません。",
+                IsSuccessful = false
+            };
+        }
+
+        var stepResults = new List<ExecutionResult>();
+
         foreach (var step in plan.Steps)
         {
             token.ThrowIfCancellationRequested();
-            
+
             try
             {
+                _logger.LogInformation("ステップを実行します: {ToolName}", step.ToolName);
+
                 var stepResult = await _mcpServer.ExecuteToolAsync(
-                    step.ToolName, 
-                    step.Arguments, 
+                    step.ToolName,
+                    step.Arguments,
                     step.Timeout);
-                
-                results.Add(new StepExecutionResult
+
+                var executionResult = new ExecutionResult
                 {
-                    Step = step,
+                    Content = stepResult.Output?.ToString() ?? "実行完了",
                     IsSuccessful = stepResult.IsSuccessful,
-                    Output = stepResult.Output,
-                    Error = stepResult.Error
-                });
-                
-                _currentContext.AddExecutionResult(stepResult);
-                
+                    Error = stepResult.Error,
+                    Duration = stepResult.Duration
+                };
+
+                stepResults.Add(executionResult);
+                _currentContext?.AddExecutionResult(executionResult);
+
+                // 状態を保存
+                if (_currentContext != null)
+                {
+                    await _stateManager.SaveStateAsync(_currentContext);
+                }
+
                 if (!stepResult.IsSuccessful)
                 {
+                    _logger.LogWarning("ステップ実行に失敗しました: {ToolName}, {Error}",
+                        step.ToolName, stepResult.Error);
                     break; // 失敗したら停止
                 }
             }
+            catch (OperationCanceledException)
+            {
+                _logger.LogInformation("ステップ実行がキャンセルされました: {ToolName}", step.ToolName);
+                throw;
+            }
             catch (Exception ex)
             {
-                results.Add(new StepExecutionResult
+                _logger.LogError(ex, "ステップ実行中に例外が発生しました: {ToolName}", step.ToolName);
+
+                var errorResult = new ExecutionResult
                 {
-                    Step = step,
+                    Content = ex.Message,
                     IsSuccessful = false,
-                    Error = ex.Message
-                });
-                
+                    Error = ex.Message,
+                    Duration = TimeSpan.Zero
+                };
+
+                stepResults.Add(errorResult);
+                _currentContext?.AddExecutionResult(errorResult);
                 break;
             }
         }
-        
+
+        // 最終結果を集約
+        var isSuccessful = stepResults.All(r => r.IsSuccessful);
+        var content = GenerateExecutionSummary(stepResults);
+        var totalDuration = stepResults.Sum(r => r.Duration.TotalMilliseconds);
+
         return new ExecutionResult
         {
-            IsSuccessful = results.All(r => r.IsSuccessful),
-            Content = GenerateExecutionSummary(results),
-            Warnings = results.Where(r => !string.IsNullOrEmpty(r.Error))
-                             .Select(r => r.Error).ToList()
+            Content = content,
+            IsSuccessful = isSuccessful,
+            Error = stepResults.FirstOrDefault(r => !r.IsSuccessful)?.Error,
+            Duration = TimeSpan.FromMilliseconds(totalDuration),
+            StepsExecuted = stepResults.Count
         };
     }
     
@@ -529,8 +802,8 @@ public interface IMcpServer
 public class ToolResult
 {
     public bool IsSuccessful { get; set; }
-    public object Output { get; set; }
-    public string Error { get; set; }
+    public object? Output { get; set; }
+    public string? Error { get; set; }
     public TimeSpan Duration { get; set; }
 }
 ```
@@ -539,166 +812,113 @@ public class ToolResult
 ```csharp
 public class McpServer : IMcpServer
 {
-    private readonly ILogger<McpServer> _logger;
     private readonly IExtensionManager _extensionManager;
-    private readonly Dictionary<string, McpServerToolType> _toolTypes;
-    private McpServer _mcpServerInstance;
-    
-    public McpServer(ILogger<McpServer> logger, IExtensionManager extensionManager)
+    private bool _isInitialized;
+
+    public McpServer(IExtensionManager extensionManager)
     {
-        _logger = logger;
-        _extensionManager = extensionManager;
-        _toolTypes = new Dictionary<string, McpServerToolType>();
+        _extensionManager = extensionManager ?? throw new ArgumentNullException(nameof(extensionManager));
     }
-    
+
     public async Task InitializeAsync()
     {
-        _logger.LogInformation("MCPサーバーを初期化しています...");
-        
+        if (_isInitialized)
+        {
+            return;
+        }
+
         // 拡張機能をロード
         await _extensionManager.LoadExtensionsAsync();
-        
-        // MCPサーバーインスタンスを作成
-        var options = new McpServerOptions
-        {
-            ServerInfo = new Implementation { Name = "Commanda", Version = "1.0.0" }
-        };
-        
-        // ツールハンドラーの設定
-        options.Handlers.ListToolsHandler = HandleListTools;
-        options.Handlers.CallToolHandler = HandleCallTool;
-        
-        _mcpServerInstance = McpServer.Create(new StdioServerTransport("Commanda"), options);
-        
-        _logger.LogInformation("MCPサーバーの初期化が完了しました");
+
+        _isInitialized = true;
     }
     
-    private async Task<ListToolsResult> HandleListTools(ListToolsRequest request, CancellationToken token)
+    public async Task<ToolResult> ExecuteToolAsync(string toolName, Dictionary<string, object> arguments, TimeSpan timeout)
     {
-        var tools = new List<Tool>();
-        
-        // 組み込みツールの追加
-        tools.AddRange(GetBuiltInTools());
-        
-        // 拡張ツールの追加
-        var extensions = await _extensionManager.GetLoadedExtensionsAsync();
-        foreach (var extension in extensions)
+        if (!_isInitialized)
         {
-            foreach (var toolType in extension.ToolTypes)
-            {
-                var toolInfo = ExtractToolInfo(toolType);
-                tools.Add(toolInfo);
-            }
+            throw new InvalidOperationException("MCPサーバーが初期化されていません");
         }
-        
-        return new ListToolsResult { Tools = tools };
-    }
-    
-    private async Task<CallToolResult> HandleCallTool(CallToolRequest request, CancellationToken token)
-    {
+
         var startTime = DateTime.UtcNow;
-        
+
         try
         {
-            _logger.LogInformation($"ツール実行: {request.Params.Name}");
-            
-            var result = await ExecuteToolInternalAsync(
-                request.Params.Name, 
-                request.Params.Arguments, 
-                token);
-            
+            var result = await ExecuteToolInternalAsync(toolName, arguments, timeout);
+
             var duration = DateTime.UtcNow - startTime;
-            
-            return new CallToolResult
-            {
-                Content = new List<ContentBlock>
-                {
-                    new TextContentBlock 
-                    { 
-                        Text = result.Output?.ToString() ?? "実行完了",
-                        Type = "text" 
-                    }
-                }
-            };
+            result.Duration = duration;
+
+            return result;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"ツール実行エラー: {request.Params.Name}");
-            
-            return new CallToolResult
+            return new ToolResult
             {
-                Content = new List<ContentBlock>
-                {
-                    new TextContentBlock 
-                    { 
-                        Text = $"エラー: {ex.Message}",
-                        Type = "text" 
-                    }
-                },
-                IsError = true
+                IsSuccessful = false,
+                Error = ex.Message,
+                Duration = DateTime.UtcNow - startTime
             };
         }
     }
-    
+
     private async Task<ToolResult> ExecuteToolInternalAsync(
-        string toolName, 
-        Dictionary<string, object> arguments, 
-        CancellationToken token)
+        string toolName,
+        Dictionary<string, object> arguments,
+        TimeSpan timeout)
     {
         // 拡張ツールの検索
         var extensions = await _extensionManager.GetLoadedExtensionsAsync();
         foreach (var extension in extensions)
         {
-            var toolType = extension.ToolTypes.FirstOrDefault(t => 
+            var toolType = extension.ToolTypes.FirstOrDefault(t =>
                 GetToolNameFromType(t) == toolName);
-            
+
             if (toolType != null)
             {
-                return await ExecuteExtensionToolAsync(toolType, arguments, token);
+                return await ExecuteExtensionToolAsync(toolType, arguments);
             }
         }
-        
+
         // 組み込みツールの実行
-        return await ExecuteBuiltInToolAsync(toolName, arguments, token);
+        return await ExecuteBuiltInToolAsync(toolName, arguments);
     }
-    
+
     private async Task<ToolResult> ExecuteExtensionToolAsync(
-        McpServerToolType toolType, 
-        Dictionary<string, object> arguments, 
-        CancellationToken token)
+        McpServerToolType toolType,
+        Dictionary<string, object> arguments)
     {
         // リフレクションを使ってツールメソッドを実行
         var methods = toolType.GetMethods()
             .Where(m => m.GetCustomAttribute<McpServerToolAttribute>() != null);
-        
+
         foreach (var method in methods)
         {
             var toolAttr = method.GetCustomAttribute<McpServerToolAttribute>();
             if (toolAttr.Name == toolName)
             {
                 var instance = Activator.CreateInstance(toolType);
-                var result = await (Task)method.Invoke(instance, new object[] { arguments, token });
+                var result = await (Task)method.Invoke(instance, new object[] { arguments });
                 return new ToolResult { IsSuccessful = true, Output = result };
             }
         }
-        
+
         throw new ToolNotFoundException($"ツール '{toolName}' が見つかりません");
     }
-    
+
     private async Task<ToolResult> ExecuteBuiltInToolAsync(
-        string toolName, 
-        Dictionary<string, object> arguments, 
-        CancellationToken token)
+        string toolName,
+        Dictionary<string, object> arguments)
     {
         // 組み込みツールの実装（例: ファイル操作）
         switch (toolName)
         {
             case "read_file":
-                return await FileOperations.ReadFileAsync(arguments, token);
+                return await FileOperations.ReadFileAsync(arguments);
             case "write_file":
-                return await FileOperations.WriteFileAsync(arguments, token);
+                return await FileOperations.WriteFileAsync(arguments);
             case "list_directory":
-                return await FileOperations.ListDirectoryAsync(arguments, token);
+                return await FileOperations.ListDirectoryAsync(arguments);
             default:
                 throw new ToolNotFoundException($"組み込みツール '{toolName}' が見つかりません");
         }
@@ -1129,45 +1349,107 @@ public class GlobalExceptionHandler : IObserver<Exception>
 
 ### 2.1 ユニットテスト
 ```csharp
-[TestFixture]
 public class AgentOrchestratorTests
 {
-    private Mock<ITaskPlanner> _plannerMock;
-    private Mock<IExecutionMonitor> _monitorMock;
-    private Mock<IStateManager> _stateMock;
-    private Mock<IMcpServer> _mcpMock;
-    
-    [SetUp]
-    public void Setup()
+    private readonly Mock<ITaskPlanner> _taskPlannerMock;
+    private readonly Mock<IExecutionMonitor> _executionMonitorMock;
+    private readonly Mock<IStateManager> _stateManagerMock;
+    private readonly Mock<ILlmProviderManager> _llmManagerMock;
+    private readonly Mock<IMcpServer> _mcpServerMock;
+    private readonly InputValidator _inputValidator;
+    private readonly Mock<ILogger<AgentOrchestrator>> _loggerMock;
+    private readonly AgentOrchestrator _orchestrator;
+
+    public AgentOrchestratorTests()
     {
-        _plannerMock = new Mock<ITaskPlanner>();
-        _monitorMock = new Mock<IExecutionMonitor>();
-        _stateMock = new Mock<IStateManager>();
-        _mcpMock = new Mock<IMcpServer>();
+        _taskPlannerMock = new Mock<ITaskPlanner>();
+        _executionMonitorMock = new Mock<IExecutionMonitor>();
+        _stateManagerMock = new Mock<IStateManager>();
+        _llmManagerMock = new Mock<ILlmProviderManager>();
+        _mcpServerMock = new Mock<IMcpServer>();
+        _inputValidator = new InputValidator();
+        _loggerMock = new Mock<ILogger<AgentOrchestrator>>();
+
+        // Setup default behaviors to prevent null reference exceptions
+        _executionMonitorMock.Setup(m => m.EvaluateResultAsync(It.IsAny<ExecutionResult>(), It.IsAny<AgentContext>()))
+                             .ReturnsAsync(new EvaluationResult { IsSuccessful = false, ShouldRetry = false });
+        _stateManagerMock.Setup(m => m.SaveStateAsync(It.IsAny<AgentContext>()))
+                         .Returns(Task.CompletedTask);
+        _mcpServerMock.Setup(m => m.ExecuteToolAsync(It.IsAny<string>(), It.IsAny<Dictionary<string, object>>(), It.IsAny<TimeSpan>()))
+                      .ReturnsAsync(new ToolResult { IsSuccessful = true, Output = "Mock output" });
+
+        _orchestrator = new AgentOrchestrator(
+            _taskPlannerMock.Object,
+            _executionMonitorMock.Object,
+            _stateManagerMock.Object,
+            _llmManagerMock.Object,
+            _mcpServerMock.Object,
+            _inputValidator,
+            _loggerMock.Object);
     }
-    
-    [Test]
-    public async Task ExecuteTaskAsync_SuccessfulExecution_ReturnsResult()
+
+    [Fact]
+    public async Task ExecuteTaskAsync_ValidInput_ReturnsSuccessfulResult()
     {
         // Arrange
-        var orchestrator = new AgentOrchestrator(
-            _plannerMock.Object, _monitorMock.Object, 
-            _stateMock.Object, _mcpMock.Object);
-        
-        var plan = new ExecutionPlan { Description = "Test plan" };
-        var evalResult = new EvaluationResult { IsSuccessful = true };
-        
-        _plannerMock.Setup(p => p.GeneratePlanAsync(It.IsAny<AgentContext>(), It.IsAny<CancellationToken>()))
-                   .ReturnsAsync(plan);
-        _monitorMock.Setup(m => m.EvaluateResultAsync(It.IsAny<ExecutionResult>(), It.IsAny<AgentContext>()))
-                   .ReturnsAsync(evalResult);
-        
+        var userInput = "Hello, create a test file";
+        var expectedContent = "Task completed successfully";
+
+        // Setup task planner to return a simple plan
+        var plan = new ExecutionPlan
+        {
+            Description = "Test plan",
+            Steps = new List<ExecutionStep>
+            {
+                new ExecutionStep
+                {
+                    ToolName = "test_tool",
+                    Arguments = new Dictionary<string, object> { { "input", "test" } },
+                    ExpectedOutcome = "File created",
+                    Timeout = TimeSpan.FromSeconds(30)
+                }
+            }
+        };
+
+        _taskPlannerMock.Setup(p => p.GeneratePlanAsync(It.IsAny<AgentContext>(), It.IsAny<CancellationToken>()))
+                       .ReturnsAsync(plan);
+
+        // Setup MCP server to return successful tool result
+        var toolResult = new ToolResult
+        {
+            IsSuccessful = true,
+            Output = expectedContent,
+            Duration = TimeSpan.FromSeconds(1)
+        };
+
+        _mcpServerMock.Setup(m => m.ExecuteToolAsync("test_tool", It.IsAny<Dictionary<string, object>>(), It.IsAny<TimeSpan>()))
+                     .ReturnsAsync(toolResult);
+
+        // Setup execution monitor to return successful evaluation
+        var evaluationResult = new EvaluationResult
+        {
+            IsSuccessful = true,
+            ShouldRetry = false,
+            Feedback = "Task completed successfully"
+        };
+
+        _executionMonitorMock.Setup(m => m.EvaluateResultAsync(It.IsAny<ExecutionResult>(), It.IsAny<AgentContext>()))
+                            .ReturnsAsync(evaluationResult);
+
         // Act
-        var result = await orchestrator.ExecuteTaskAsync("test input");
-        
+        var result = await _orchestrator.ExecuteTaskAsync(userInput);
+
         // Assert
-        Assert.IsTrue(result.IsSuccessful);
-        _plannerMock.Verify(p => p.GeneratePlanAsync(It.IsAny<AgentContext>(), It.IsAny<CancellationToken>()), Times.Once);
+        Assert.True(result.IsSuccessful);
+        Assert.Contains("正常に完了", result.Content);
+        Assert.Equal(1, result.StepsExecuted);
+        Assert.True(result.Duration > TimeSpan.Zero);
+
+        // Verify interactions
+        _taskPlannerMock.Verify(p => p.GeneratePlanAsync(It.IsAny<AgentContext>(), It.IsAny<CancellationToken>()), Times.Once);
+        _mcpServerMock.Verify(m => m.ExecuteToolAsync("test_tool", It.IsAny<Dictionary<string, object>>(), It.IsAny<TimeSpan>()), Times.Once);
+        _executionMonitorMock.Verify(m => m.EvaluateResultAsync(It.IsAny<ExecutionResult>(), It.IsAny<AgentContext>()), Times.Once);
+        _stateManagerMock.Verify(m => m.SaveStateAsync(It.IsAny<AgentContext>()), Times.AtLeastOnce);
     }
 }
 ```
