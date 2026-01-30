@@ -1,7 +1,11 @@
+using Commanda.Core;
 using Commanda.Extensions;
 using Microsoft.AspNetCore.Mvc;
+using System.Runtime.Versioning;
 
 namespace Commanda.WebApi.Controllers;
+
+[SupportedOSPlatform("windows")]
 
 /// <summary>
 /// 拡張機能管理APIコントローラー

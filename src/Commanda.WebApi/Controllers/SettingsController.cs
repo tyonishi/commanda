@@ -1,5 +1,6 @@
 using Commanda.Core;
 using Microsoft.AspNetCore.Mvc;
+using System.Runtime.Versioning;
 
 namespace Commanda.WebApi.Controllers;
 
@@ -8,6 +9,7 @@ namespace Commanda.WebApi.Controllers;
 /// </summary>
 [ApiController]
 [Route("api/settings")]
+[SupportedOSPlatform("windows")]
 public class SettingsController : ControllerBase
 {
     private readonly ISettingsManager _settingsManager;
