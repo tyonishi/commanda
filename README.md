@@ -79,6 +79,17 @@ graph TB
 3. アプリケーションを起動
 
 #### オプション2: ソースコードからビルド
+
+**クイックビルド（PowerShellスクリプト使用）:**
+```powershell
+# ビルドスクリプトを実行（テスト付き）
+.\tools\build-release.ps1
+
+# またはテストをスキップして高速ビルド
+.\tools\build-release.ps1 -SkipTests
+```
+
+**手動ビルド:**
 ```bash
 # リポジトリをクローン
 git clone https://github.com/your-org/commanda.git
@@ -90,9 +101,17 @@ dotnet restore
 # ビルド
 dotnet build --configuration Release
 
+# テスト実行
+dotnet test --configuration Release --no-build
+
 # 実行
 dotnet run --project src/Commanda/Commanda.csproj
+
+# リリース用パッケージ作成
+dotnet publish src/Commanda/Commanda.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true --output ./publish
 ```
+
+詳細なビルド手順は [docs/RELEASE.md](docs/RELEASE.md) を参照してください。
 
 ### 初期設定
 

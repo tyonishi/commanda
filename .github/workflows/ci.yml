@@ -53,10 +53,20 @@ jobs:
         # Critical decision: Use timeout to prevent hanging in CI environment; WPF apps may not display UI but should initialize without errors
       # Critical decision: Log output for debugging; expect timeout as WPF requires GUI environment not available in CI
 
+    - name: Publish self-contained executable
+      run: |
+        dotnet publish src/Commanda/Commanda.csproj -c Release -r win-x64 --self-contained true `
+          -p:PublishSingleFile=true `
+          -p:IncludeNativeLibrariesForSelfExtract=true `
+          -p:DebugType=None `
+          -p:DebugSymbols=false `
+          --output ./publish
+      # Critical decision: Create optimized self-contained executable for distribution
+
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
       with:
         name: commanda-build
         path: |
-          src/Commanda/bin/Release/net8.0-windows/win-x64/publish/
+          ./publish/
       # Critical decision: Upload self-contained executable for deployment; configured in csproj as PublishSingleFile and SelfContained

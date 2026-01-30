@@ -74,7 +74,8 @@ graph TB
 ### 3.4 Operation Engine
 - **技術**: C# Interop + Process API
 - **責任**: 実際のPC操作実行
-- **サポート操作**: ファイル操作、アプリ制御、Excel/Word自動化
+- **サポート操作**: ファイル操作、アプリ制御、テキスト処理
+- **将来対応**: Office自動化（Excel/Word）は.NET 8互換性の問題により延期
 
 ### 3.5 Agent Orchestrator
 - **技術**: ステートマシン + 非同期処理
@@ -188,6 +189,38 @@ graph TB
 - **サポート**: ユーザー問い合わせリスク → 詳細ドキュメント
 
 ## 8. 開発フェーズ
+
+## 9. 実装状況（2026-01-31時点）
+
+### 9.1 完了済み機能（95%）
+
+| フェーズ | 内容 | 状態 | 詳細 |
+|---------|------|------|------|
+| **Phase 1** | MCPコアツール | ✅ 完了 | 11ツール（ファイル、アプリ、テキスト処理） |
+| **Phase 2** | UI強化 | ✅ 完了 | 設定画面、実行履歴、キャンセル機能 |
+| **Phase 3** | 追加LLMプロバイダー | ✅ 完了 | 4プロバイダー（OpenAI, Anthropic, Ollama, LMStudio） |
+
+**実装済みMCPツール（11個）:**
+- **FileOperations**: read_file, write_file, list_directory
+- **ApplicationControl**: launch_application, close_application, get_running_applications
+- **TextProcessing**: read_text_file, write_text_file, append_to_file, search_in_file, replace_in_file
+
+**対応LLMプロバイダー（4つ）:**
+- **OpenAI**: GPT-3.5/GPT-4対応
+- **Anthropic**: Claude対応、SSEストリーミング
+- **Ollama**: ローカルLLM、NDJSONストリーミング
+- **LM Studio**: OpenAI互換API、SSEストリーミング
+
+### 9.2 将来対応機能
+
+| フェーズ | 内容 | 状態 | 理由 |
+|---------|------|------|------|
+| **Phase 4** | Office自動化 | ⏸️ 延期 | .NET 8とOffice Interopの互換性問題 |
+| **Phase 5** | 認証機能 | 📋 不要 | ユーザーフォルダで自動分離されるため |
+
+**備考:**
+- Office自動化はEPPlus等の代替ライブラリで将来対応を検討
+- 認証機能はエンタープライズ展開時に必要に応じて実装
 
 ### 8.1 Phase 1: PoC (2週間)
 - 基本UIとLLM統合
