@@ -1,6 +1,7 @@
 using System.Reflection;
 using System.Composition.Hosting;
 using System.Composition;
+using System.Runtime.Versioning;
 using Commanda.Core;
 
 namespace Commanda.Extensions;
@@ -8,6 +9,7 @@ namespace Commanda.Extensions;
 /// <summary>
 /// 拡張機能マネージャーの実装
 /// </summary>
+[SupportedOSPlatform("windows")]
 public class ExtensionManager : IExtensionManager
 {
     private readonly List<IMcpExtension> _loadedExtensions = new();
@@ -146,5 +148,24 @@ public class ExtensionManager : IExtensionManager
     {
         _loadedExtensions.Clear();
         await LoadExtensionsAsync();
+    }
+
+    /// <summary>
+    /// 拡張機能の有効化状態を設定します
+    /// </summary>
+    /// <param name="name">拡張機能名</param>
+    /// <param name="enabled">有効化フラグ</param>
+    /// <returns>設定が成功したかどうか</returns>
+    public Task<bool> SetExtensionEnabledAsync(string name, bool enabled)
+    {
+        // 現在の実装では単純に成功を返す（将来の実装で拡張）
+        var extension = _loadedExtensions.FirstOrDefault(e => e.Name == name);
+        if (extension != null)
+        {
+            // 実際の実装では、ここで拡張機能の有効化状態を変更する
+            // 現在は常に成功を返す
+            return Task.FromResult(true);
+        }
+        return Task.FromResult(false);
     }
 }

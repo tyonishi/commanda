@@ -88,6 +88,26 @@ public interface IMcpExtension
     IEnumerable<Type> ToolTypes { get; }
 
     /// <summary>
+    /// アセンブリパス
+    /// </summary>
+    string? AssemblyPath { get; }
+
+    /// <summary>
+    /// 有効化状態
+    /// </summary>
+    bool IsEnabled { get; }
+
+    /// <summary>
+    /// インストール日時
+    /// </summary>
+    DateTime InstalledAt { get; }
+
+    /// <summary>
+    /// 最終使用日時
+    /// </summary>
+    DateTime? LastUsed { get; }
+
+    /// <summary>
     /// 拡張機能を初期化します
     /// </summary>
     /// <param name="services">サービスプロバイダ</param>

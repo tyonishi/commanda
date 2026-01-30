@@ -1,0 +1,114 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: windows-latest
+    # Critical decision: Use windows-latest runner as the application targets win-x64 and requires Windows-specific features like WPF
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+      # Critical decision: Fetch full history for changelog generation
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.0.x
+      # Critical decision: Use .NET 8.0 as specified in project configuration and AGENTS.md
+
+    - name: Restore dependencies
+      run: dotnet restore
+      # Critical decision: Restore all project dependencies before building to ensure no missing packages
+
+    - name: Build solution
+      run: dotnet build --configuration Release --no-restore
+      # Critical decision: Build in Release mode for production-ready binaries
+
+    - name: Run tests
+      run: dotnet test --configuration Release --no-build --verbosity normal
+      # Critical decision: Execute all tests to verify functionality before release
+
+    - name: Get version from tag
+      id: get_version
+      run: |
+        $version = $env:GITHUB_REF -replace 'refs/tags/v', ''
+        echo "VERSION=$version" >> $env:GITHUB_OUTPUT
+        echo "Version: $version"
+      # Critical decision: Extract version from git tag (e.g., v1.0.0 -> 1.0.0)
+
+    - name: Publish self-contained executable
+      run: |
+        dotnet publish src/Commanda/Commanda.csproj -c Release -r win-x64 --self-contained true `
+          -p:PublishSingleFile=true `
+          -p:IncludeNativeLibrariesForSelfExtract=true `
+          -p:DebugType=None `
+          -p:DebugSymbols=false `
+          --output ./publish
+      # Critical decision: Create optimized self-contained executable for distribution
+
+    - name: Create release package
+      run: |
+        $version = "${{ steps.get_version.outputs.VERSION }}"
+        $zipName = "Commanda-v$version-win-x64.zip"
+        Compress-Archive -Path ./publish/* -DestinationPath ./$zipName
+        echo "ZIP_NAME=$zipName" >> $env:GITHUB_OUTPUT
+        
+        # Generate checksum
+        $hash = Get-FileHash -Path ./$zipName -Algorithm SHA256
+        $hash.Hash | Out-File -FilePath "./checksums.txt" -Encoding UTF8
+        echo "SHA256: $($hash.Hash)"
+      id: create_package
+      # Critical decision: Create ZIP archive and checksum for release distribution
+
+    - name: Generate release notes
+      run: |
+        $version = "${{ steps.get_version.outputs.VERSION }}"
+        $changelog = Get-Content CHANGELOG.md -Raw
+        
+        # Extract section for this version
+        $pattern = "## \[$version\].*?(?=## \[|$)"
+        $match = [regex]::Match($changelog, $pattern, [System.Text.RegularExpressions.RegexOptions]::Singleline)
+        
+        if ($match.Success) {
+          $releaseNotes = $match.Value.Trim()
+        } else {
+          $releaseNotes = "## What's New in v$version`n`nSee CHANGELOG.md for full details."
+        }
+        
+        $releaseNotes | Out-File -FilePath "./RELEASE_NOTES.md" -Encoding UTF8
+        echo "Release notes generated"
+      # Critical decision: Extract version-specific changelog for release notes
+
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v1
+      with:
+        name: Commanda v${{ steps.get_version.outputs.VERSION }}
+        body_path: ./RELEASE_NOTES.md
+        files: |
+          ./Commanda-v${{ steps.get_version.outputs.VERSION }}-win-x64.zip
+          ./checksums.txt
+        draft: false
+        prerelease: ${{ contains(steps.get_version.outputs.VERSION, '-') }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # Critical decision: Create GitHub release with artifacts; mark as prerelease if version contains '-' (e.g., 1.0.0-beta)
+
+    - name: Upload artifacts for verification
+      uses: actions/upload-artifact@v4
+      with:
+        name: release-artifacts
+        path: |
+          ./Commanda-v${{ steps.get_version.outputs.VERSION }}-win-x64.zip
+          ./checksums.txt
+          ./RELEASE_NOTES.md
+      # Critical decision: Preserve release artifacts for verification and debugging
