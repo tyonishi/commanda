@@ -812,7 +812,16 @@ public class PlanStep
 - ファイルサイズ制限（10MB）
 - システムプロセス保護
 
-#### 1.4.2 インターフェース定義
+#### 1.4.2 対応LLMプロバイダー（Phase 3実装済み）
+
+| プロバイダー | クラス名 | APIタイプ | ストリーミング | 認証 |
+|------------|---------|----------|--------------|------|
+| **OpenAI** | `OpenAiProvider` | OpenAI API | ✅ SSE | APIキー |
+| **Anthropic** | `AnthropicProvider` | Claude Messages API | ✅ SSE | APIキー |
+| **Ollama** | `OllamaProvider` | Ollama Generate API | ✅ NDJSON | 不要 |
+| **LM Studio** | `LmStudioProvider` | OpenAI互換 API | ✅ SSE | 不要 |
+
+#### 1.4.3 インターフェース定義
 ```csharp
 public interface IMcpServer
 {

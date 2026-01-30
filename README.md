@@ -26,12 +26,12 @@ Commandaは、クラウドLLMとローカルMCPサーバーを組み合わせた
 | **セキュリティ** | ✅ 完了 | 入力検証、危険コマンドブロック、暗号化ストレージ |
 | **拡張機能** | ✅ 完了 | MEFベースのプラグインシステム |
 | **UI基盤** | ✅ 完了 | WPFメイン画面、MVVMパターン |
-| **設定画面** | 🔄 予定 | Phase 2で実装予定 |
-| **実行履歴** | 🔄 予定 | Phase 2で実装予定 |
-| **追加LLM** | 🔄 予定 | Anthropic, Ollama, LM Studio（Phase 3） |
-| **Office自動化** | 🔄 予定 | Excel, Word操作（Phase 4） |
+| **設定画面** | ✅ 完了 | LLMプロバイダー設定（Phase 2） |
+| **実行履歴** | ✅ 完了 | タスク履歴表示・エクスポート（Phase 2） |
+| **追加LLM** | ✅ 完了 | OpenAI, Anthropic, Ollama, LM Studio（Phase 3） |
+| **Office自動化** | ⏸️ 延期 | Excel/Word（.NET 8互換性問題、将来対応） |
 
-**現在の実装率: 90%**
+**現在の実装率: 95%**
 
 ### アーキテクチャ
 
@@ -111,24 +111,33 @@ dotnet run --project src/Commanda/Commanda.csproj
 
 ## 使用方法
 
-### 対応操作一覧
+### 対応操作一覧（11ツール）
 
-**ファイル操作:**
+**ファイル操作（3ツール）:**
 - `read_file` - ファイル読み込み
 - `write_file` - ファイル書き込み  
 - `list_directory` - ディレクトリ一覧表示
 
-**アプリケーション制御:**
+**アプリケーション制御（3ツール）:**
 - `launch_application` - アプリケーション起動（パス、引数指定可）
 - `close_application` - アプリケーション終了（PID指定）
 - `get_running_applications` - 実行中アプリケーション一覧
 
-**テキスト処理:**
+**テキスト処理（5ツール）:**
 - `read_text_file` - テキスト読み込み（エンコーディング対応）
 - `write_text_file` - テキスト書き込み（バックアップ作成可）
 - `append_to_file` - ファイル追記
 - `search_in_file` - ファイル内検索（正規表現対応）
 - `replace_in_file` - ファイル内置換（正規表現対応、バックアップ作成可）
+
+### 対応LLMプロバイダー（4つ）
+
+| プロバイダー | タイプ | 認証 | 特徴 |
+|------------|--------|------|------|
+| **OpenAI** | クラウド | APIキー | GPT-3.5/GPT-4対応 |
+| **Anthropic** | クラウド | APIキー | Claude対応、ストリーミング |
+| **Ollama** | ローカル | 不要 | ローカルLLM、カスタムモデル |
+| **LM Studio** | ローカル | 不要 | OpenAI互換API、GUI付き |
 
 ### 使用例
 
