@@ -1,0 +1,185 @@
+<Window x:Class="Commanda.SettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Commanda"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        mc:Ignorable="d"
+        Title="設定 - Commanda" 
+        Height="600" Width="700"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize"
+        TextElement.FontWeight="Regular"
+        TextElement.FontSize="13"
+        TextOptions.TextFormattingMode="Ideal">
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+    </Window.Resources>
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- ヘッダー -->
+        <TextBlock Grid.Row="0" 
+                   Text="LLMプロバイダー設定" 
+                   FontSize="20" 
+                   FontWeight="Bold" 
+                   Margin="0,0,0,16"/>
+
+        <!-- メインコンテンツ -->
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="16"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- 左側: 既存プロバイダー一覧 -->
+            <materialDesign:Card Grid.Column="0" Padding="16">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0" 
+                               Text="登録済みプロバイダー" 
+                               FontWeight="SemiBold" 
+                               Margin="0,0,0,8"/>
+
+                    <ListBox Grid.Row="1" 
+                             ItemsSource="{Binding Providers}" 
+                             SelectedItem="{Binding SelectedProvider}"
+                             DisplayMemberPath="Name"
+                             MinHeight="200"/>
+
+                    <Button Grid.Row="2" 
+                            Content="削除" 
+                            Command="{Binding RemoveProviderCommand}"
+                            Margin="0,8,0,0"
+                            Style="{StaticResource MaterialDesignFlatButton}"
+                            Foreground="Red"/>
+                </Grid>
+            </materialDesign:Card>
+
+            <!-- 右側: 新規プロバイダー追加 -->
+            <materialDesign:Card Grid.Column="2" Padding="16">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0" 
+                               Text="新規プロバイダー追加" 
+                               FontWeight="SemiBold" 
+                               Margin="0,0,0,16"/>
+
+                    <!-- プロバイダー名 -->
+                    <TextBlock Grid.Row="1" Text="プロバイダー名 *" Margin="0,0,0,4"/>
+                    <TextBox Grid.Row="2" 
+                             Text="{Binding NewProviderName, UpdateSourceTrigger=PropertyChanged}"
+                             materialDesign:HintAssist.Hint="例: MyOpenAI"
+                             Margin="0,0,0,12"/>
+
+                    <!-- プロバイダータイプ -->
+                    <TextBlock Grid.Row="3" Text="タイプ *" Margin="0,0,0,4"/>
+                    <ComboBox Grid.Row="4" 
+                              ItemsSource="{Binding AvailableProviderTypes}"
+                              SelectedItem="{Binding NewProviderType}"
+                              Margin="0,0,0,12"/>
+
+                    <!-- APIキー -->
+                    <TextBlock Grid.Row="5" Text="APIキー *" Margin="0,0,0,4"/>
+                    <PasswordBox Grid.Row="6" 
+                                 x:Name="ApiKeyPasswordBox"
+                                 PasswordChanged="ApiKeyPasswordBox_PasswordChanged"
+                                 Margin="0,0,0,12"/>
+
+                    <!-- ベースURI -->
+                    <TextBlock Grid.Row="7" Text="ベースURI（オプション）" Margin="0,0,0,4"/>
+                    <TextBox Grid.Row="8" 
+                             Text="{Binding NewBaseUri, UpdateSourceTrigger=PropertyChanged}"
+                             materialDesign:HintAssist.Hint="例: https://api.openai.com/v1"
+                             Margin="0,0,0,12"/>
+
+                    <!-- モデル名 -->
+                    <TextBlock Grid.Row="9" Text="モデル名（オプション）" Margin="0,0,0,4"/>
+                    <TextBox Grid.Row="10" 
+                             Text="{Binding NewModelName, UpdateSourceTrigger=PropertyChanged}"
+                             materialDesign:HintAssist.Hint="例: gpt-3.5-turbo"
+                             Margin="0,0,0,8"/>
+                </Grid>
+            </materialDesign:Card>
+        </Grid>
+
+        <!-- デフォルト設定 -->
+        <CheckBox Grid.Row="2" 
+                  Content="デフォルトプロバイダーとして設定"
+                  IsChecked="{Binding IsDefaultProvider}"
+                  Margin="0,16,0,0"/>
+
+        <!-- ボタンエリア -->
+        <Grid Grid.Row="3" Margin="0,16,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="8"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="8"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- ステータスメッセージ -->
+            <TextBlock Grid.Column="0" 
+                       Text="{Binding StatusMessage}">
+                <TextBlock.Style>
+                    <Style TargetType="TextBlock" BasedOn="{StaticResource {x:Type TextBlock}}">
+                        <Setter Property="VerticalAlignment" Value="Center"/>
+                        <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsStatusError}" Value="True">
+                                <Setter Property="Foreground" Value="Red"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding IsStatusError}" Value="False">
+                                <Setter Property="Foreground" Value="{DynamicResource MaterialDesignBody}"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
+
+            <Button Grid.Column="1" 
+                    Content="テスト"
+                    Command="{Binding TestProviderCommand}"
+                    Style="{StaticResource MaterialDesignOutlinedButton}"/>
+
+            <Button Grid.Column="3" 
+                    Content="追加"
+                    Command="{Binding AddProviderCommand}"
+                    Style="{StaticResource MaterialDesignRaisedButton}"/>
+
+            <Button Grid.Column="5" 
+                    Content="保存して閉じる"
+                    Command="{Binding SaveSettingsCommand}"
+                    IsDefault="True"
+                    Style="{StaticResource MaterialDesignRaisedButton}"
+                    Click="SaveAndCloseButton_Click"/>
+        </Grid>
+    </Grid>
+</Window>

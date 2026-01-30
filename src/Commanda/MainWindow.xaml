@@ -21,6 +21,26 @@
 
     <Grid>
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- メニュー -->
+        <Menu Grid.Row="0" IsMainMenu="True">
+            <MenuItem Header="ファイル">
+                <MenuItem Header="設定..." Click="SettingsMenuItem_Click"/>
+                <MenuItem Header="実行履歴..." Click="HistoryMenuItem_Click"/>
+                <Separator/>
+                <MenuItem Header="終了" Click="ExitMenuItem_Click"/>
+            </MenuItem>
+            <MenuItem Header="ヘルプ">
+                <MenuItem Header="バージョン情報" Click="AboutMenuItem_Click"/>
+            </MenuItem>
+        </Menu>
+
+        <!-- メインコンテンツ -->
+        <Grid Grid.Row="1">
+        <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
@@ -137,9 +157,19 @@
                         Command="{Binding SendCommand}"
                         Width="80" Height="48"
                         ToolTip="コマンドを送信して実行"
-                        IsEnabled="{Binding IsExecuting, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=inverse}"
+                        Visibility="{Binding IsExecuting, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=inverse}"
                         AutomationProperties.Name="送信ボタン"
                         AutomationProperties.HelpText="入力したコマンドをAIに送信して実行します"/>
+
+                <!-- キャンセルボタン -->
+                <Button Grid.Column="1" Content="キャンセル"
+                        Command="{Binding CancelCommand}"
+                        Width="80" Height="48"
+                        ToolTip="実行をキャンセル"
+                        Visibility="{Binding IsExecuting, Converter={StaticResource BooleanToVisibilityConverter}}"
+                        Foreground="Red"
+                        AutomationProperties.Name="キャンセルボタン"
+                        AutomationProperties.HelpText="実行中の操作をキャンセルします"/>
 
                 <!-- 実行中インジケーター -->
                 <StackPanel Grid.Column="0" Grid.ColumnSpan="2"
@@ -156,4 +186,5 @@
             </Grid>
         </materialDesign:Card>
     </Grid>
+</Grid>
 </Window>

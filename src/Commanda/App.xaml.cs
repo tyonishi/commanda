@@ -2,6 +2,7 @@ using System.Windows;
 using Commanda.Core;
 using Commanda.Extensions;
 using Commanda.Mcp;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
@@ -13,6 +14,11 @@ namespace Commanda;
 public partial class App : Application
 {
     private IHost? _host;
+
+    /// <summary>
+    /// DIサービスプロバイダー
+    /// </summary>
+    public IServiceProvider ServiceProvider => _host?.Services ?? throw new InvalidOperationException("Host is not initialized");
 
     protected override async void OnStartup(StartupEventArgs e)
     {
@@ -30,6 +36,10 @@ public partial class App : Application
                 services.AddSingleton<IAgentOrchestrator, AgentOrchestrator>();
                 services.AddSingleton<InputValidator>();
                 services.AddSingleton<SecureStorage>();
+
+                // Database
+                services.AddDbContext<CommandaDbContext>();
+                services.AddScoped<IRepository<ExecutionLog>, Repository<ExecutionLog>>();
 
                 // Extensions
                 services.AddSingleton<IExtensionManager, ExtensionManager>();

@@ -124,12 +124,12 @@ public class LlmProviderConfig
     /// <summary>
     /// ベースURI
     /// </summary>
-    public string BaseUri { get; set; } = string.Empty;
+    public string? BaseUri { get; set; }
 
     /// <summary>
     /// モデル名
     /// </summary>
-    public string ModelName { get; set; } = string.Empty;
+    public string? ModelName { get; set; }
 
     /// <summary>
     /// デフォルトプロバイダーかどうか
