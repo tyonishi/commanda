@@ -87,7 +87,11 @@ public class McpServer : IMcpServer
         var tools = new List<string>();
 
         // 組み込みツールの追加
-        tools.AddRange(new[] { "read_file", "write_file", "list_directory" });
+        tools.AddRange(new[] { 
+            "read_file", "write_file", "list_directory",
+            "launch_application", "close_application", "get_running_applications",
+            "read_text_file", "write_text_file", "append_to_file", "search_in_file", "replace_in_file"
+        });
 
         // 拡張ツールの追加
         var extensions = await _extensionManager.GetLoadedExtensionsAsync();
@@ -214,6 +218,24 @@ public class McpServer : IMcpServer
                 return await FileOperations.WriteFileAsync(arguments, token);
             case "list_directory":
                 return await FileOperations.ListDirectoryAsync(arguments, token);
+            // ApplicationControlツール
+            case "launch_application":
+                return await ApplicationControl.LaunchApplicationAsync(arguments, token);
+            case "close_application":
+                return await ApplicationControl.CloseApplicationAsync(arguments, token);
+            case "get_running_applications":
+                return await ApplicationControl.GetRunningApplicationsAsync(arguments, token);
+            // TextProcessingツール
+            case "read_text_file":
+                return await TextProcessing.ReadTextFileAsync(arguments, token);
+            case "write_text_file":
+                return await TextProcessing.WriteTextFileAsync(arguments, token);
+            case "append_to_file":
+                return await TextProcessing.AppendToFileAsync(arguments, token);
+            case "search_in_file":
+                return await TextProcessing.SearchInFileAsync(arguments, token);
+            case "replace_in_file":
+                return await TextProcessing.ReplaceInFileAsync(arguments, token);
             default:
                 // 拡張ツールの実行を試行
                 var result = await ExecuteExtensionToolAsync(toolName, arguments, token);

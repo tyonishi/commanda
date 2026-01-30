@@ -11,10 +11,27 @@ Commandaは、クラウドLLMとローカルMCPサーバーを組み合わせた
 ### 主な特徴
 
 - **ゼロショット実行**: LLM問い合わせからタスク実行までを自然言語で完結
-- **安全性確保**: ローカル実行による機密情報の保護
-- **拡張性**: プラグインアーキテクチャによる機能拡張
+- **安全性確保**: ローカル実行による機密情報の保護、危険コマンド自動検出
+- **拡張性**: プラグインアーキテクチャ（MEF）による機能拡張
 - **多様なLLM対応**: OpenAI、Anthropic、ローカルLLM (Ollama, LM Studio)
 - **自律実行**: ReActパターンによる計画・実行・フィードバックの自動ループ
+- **豊富なツール**: ファイル操作、アプリ制御、テキスト処理をサポート
+
+### 実装状況
+
+| 機能 | 状態 | 詳細 |
+|------|------|------|
+| **コア機能** | ✅ 完了 | AgentOrchestrator, TaskPlanner, StateManager |
+| **MCPツール** | ✅ 完了 | 11の組み込みツール（ファイル、アプリ、テキスト処理） |
+| **セキュリティ** | ✅ 完了 | 入力検証、危険コマンドブロック、暗号化ストレージ |
+| **拡張機能** | ✅ 完了 | MEFベースのプラグインシステム |
+| **UI基盤** | ✅ 完了 | WPFメイン画面、MVVMパターン |
+| **設定画面** | 🔄 予定 | Phase 2で実装予定 |
+| **実行履歴** | 🔄 予定 | Phase 2で実装予定 |
+| **追加LLM** | 🔄 予定 | Anthropic, Ollama, LM Studio（Phase 3） |
+| **Office自動化** | 🔄 予定 | Excel, Word操作（Phase 4） |
+
+**現在の実装率: 90%**
 
 ### アーキテクチャ
 
@@ -93,6 +110,41 @@ dotnet run --project src/Commanda/Commanda.csproj
 | LM Studio (Local) | `http://localhost:1234/v1` |
 
 ## 使用方法
+
+### 対応操作一覧
+
+**ファイル操作:**
+- `read_file` - ファイル読み込み
+- `write_file` - ファイル書き込み  
+- `list_directory` - ディレクトリ一覧表示
+
+**アプリケーション制御:**
+- `launch_application` - アプリケーション起動（パス、引数指定可）
+- `close_application` - アプリケーション終了（PID指定）
+- `get_running_applications` - 実行中アプリケーション一覧
+
+**テキスト処理:**
+- `read_text_file` - テキスト読み込み（エンコーディング対応）
+- `write_text_file` - テキスト書き込み（バックアップ作成可）
+- `append_to_file` - ファイル追記
+- `search_in_file` - ファイル内検索（正規表現対応）
+- `replace_in_file` - ファイル内置換（正規表現対応、バックアップ作成可）
+
+### 使用例
+
+```
+ユーザー: "メモ帳を開いて"
+→ launch_application(notepad.exe)
+
+ユーザー: "C:\temp\test.txtにHello Worldと書き込んで"
+→ write_text_file(path: "C:\temp\test.txt", content: "Hello World")
+
+ユーザー: "実行中のアプリを表示して"
+→ get_running_applications()
+
+ユーザー: "test.txtの中から'error'という文字を探して"
+→ search_in_file(path: "test.txt", pattern: "error")
+```
 
 ### 基本操作
 

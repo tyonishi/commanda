@@ -788,7 +788,31 @@ public class PlanStep
 
 ### 1.4 MCP Server
 
-#### 1.4.1 インターフェース定義
+#### 1.4.1 実装済みツール一覧
+
+**Phase 1で実装されたツール:**
+
+| ツール名 | カテゴリ | 機能 | パラメータ |
+|---------|---------|------|-----------|
+| `read_file` | FileOperations | ファイル読み込み | path |
+| `write_file` | FileOperations | ファイル書き込み | path, content |
+| `list_directory` | FileOperations | ディレクトリ一覧 | path |
+| `launch_application` | ApplicationControl | アプリ起動 | path, arguments, working_directory |
+| `close_application` | ApplicationControl | アプリ終了 | process_id |
+| `get_running_applications` | ApplicationControl | 実行中アプリ一覧 | - |
+| `read_text_file` | TextProcessing | テキスト読み込み | path, encoding |
+| `write_text_file` | TextProcessing | テキスト書き込み | path, content, encoding, create_backup |
+| `append_to_file` | TextProcessing | ファイル追記 | path, content, encoding |
+| `search_in_file` | TextProcessing | ファイル内検索 | path, pattern, use_regex |
+| `replace_in_file` | TextProcessing | ファイル内置換 | path, old_text, new_text, use_regex, create_backup |
+
+**セキュリティ機能:**
+- 危険なコマンドパターンブロック（format, del, regedit等）
+- システムパス書き込み禁止（Windows/System32等）
+- ファイルサイズ制限（10MB）
+- システムプロセス保護
+
+#### 1.4.2 インターフェース定義
 ```csharp
 public interface IMcpServer
 {

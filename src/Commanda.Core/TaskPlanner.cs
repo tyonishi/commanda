@@ -81,9 +81,23 @@ public class TaskPlanner : ITaskPlanner
 ユーザーの自然言語リクエストを分析し、実行可能なステップに分解してください。
 
 利用可能なツール:
-- FileOperations: ファイルの作成、移動、コピー、削除
-- ApplicationControl: アプリケーションの起動、終了、制御
-- TextProcessing: テキストファイルの読み書き、編集
+
+【FileOperations - ファイル操作】
+- read_file: ファイルの読み込み (path)
+- write_file: ファイルの書き込み (path, content)
+- list_directory: ディレクトリ一覧 (path)
+
+【ApplicationControl - アプリケーション制御】
+- launch_application: アプリケーション起動 (path, arguments, working_directory)
+- close_application: アプリケーション終了 (process_id)
+- get_running_applications: 実行中アプリ一覧取得
+
+【TextProcessing - テキスト処理】
+- read_text_file: テキストファイル読み込み (path, encoding)
+- write_text_file: テキストファイル書き込み (path, content, encoding, create_backup)
+- append_to_file: ファイル追記 (path, content, encoding)
+- search_in_file: ファイル内検索 (path, pattern, use_regex)
+- replace_in_file: ファイル内置換 (path, old_text, new_text, use_regex, create_backup)
 
 応答形式は以下のJSON形式で:
 {
