@@ -38,6 +38,14 @@ public interface IExtensionManager
     /// </summary>
     /// <returns>リロード処理のタスク</returns>
     Task ReloadExtensionsAsync();
+
+    /// <summary>
+    /// 拡張機能の有効化状態を設定します
+    /// </summary>
+    /// <param name="name">拡張機能名</param>
+    /// <param name="enabled">有効化フラグ</param>
+    /// <returns>設定が成功したかどうか</returns>
+    Task<bool> SetExtensionEnabledAsync(string name, bool enabled);
 }
 
 /// <summary>

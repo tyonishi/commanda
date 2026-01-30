@@ -201,7 +201,8 @@ public class ExtensionInfo
     public int Id { get; set; }
     public string Name { get; set; } = string.Empty;
     public string Version { get; set; } = string.Empty;
-    public string AssemblyPath { get; set; } = string.Empty;
+    public string? AssemblyPath { get; set; }
     public bool IsEnabled { get; set; } = true;
     public DateTime InstalledAt { get; set; }
+    public DateTime? LastUsed { get; set; }
 }
