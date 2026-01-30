@@ -13,10 +13,17 @@ public class SecureStorage
     private readonly string _storagePath;
 
     /// <summary>
+    /// デフォルトコンストラクタ（テスト用）
+    /// </summary>
+    public SecureStorage() : this(null)
+    {
+    }
+
+    /// <summary>
     /// コンストラクタ
     /// </summary>
     /// <param name="storagePath">ストレージファイルのパス（オプション）</param>
-    public SecureStorage(string? storagePath = null)
+    public SecureStorage(string? storagePath)
     {
         _storagePath = storagePath ?? Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
@@ -30,7 +37,7 @@ public class SecureStorage
     /// <param name="key">キー名</param>
     /// <param name="value">保存する値</param>
     /// <returns>保存処理のタスク</returns>
-    public async Task StoreApiKeyAsync(string key, string value)
+    public virtual async Task StoreApiKeyAsync(string key, string value)
     {
         if (string.IsNullOrWhiteSpace(key))
         {
@@ -74,7 +81,7 @@ public class SecureStorage
     /// </summary>
     /// <param name="key">キー名</param>
     /// <returns>取得した値（見つからない場合はnull）</returns>
-    public async Task<string?> RetrieveApiKeyAsync(string key)
+    public virtual async Task<string?> RetrieveApiKeyAsync(string key)
     {
         if (string.IsNullOrWhiteSpace(key))
         {

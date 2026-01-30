@@ -114,6 +114,9 @@ public class LlmProviderManager : ILlmProviderManager
         ILlmProvider provider = config.ProviderType switch
         {
             "OpenAI" => new OpenAiProvider(configWithoutKey, _secureStorage),
+            "Anthropic" => new AnthropicProvider(configWithoutKey, _secureStorage),
+            "Ollama" => new OllamaProvider(configWithoutKey, _secureStorage),
+            "LMStudio" => new LmStudioProvider(configWithoutKey, _secureStorage),
             _ => throw new NotSupportedException($"プロバイダータイプ '{config.ProviderType}' はサポートされていません")
         };
 
@@ -155,11 +158,16 @@ public class LlmProviderManager : ILlmProviderManager
         {
             ILlmProvider? provider = null;
 
-            if (config.ProviderType == "OpenAI")
+            provider = config.ProviderType switch
             {
-                provider = new OpenAiProvider(config, _secureStorage);
-            }
-            else
+                "OpenAI" => new OpenAiProvider(config, _secureStorage),
+                "Anthropic" => new AnthropicProvider(config, _secureStorage),
+                "Ollama" => new OllamaProvider(config, _secureStorage),
+                "LMStudio" => new LmStudioProvider(config, _secureStorage),
+                _ => null
+            };
+
+            if (provider == null)
             {
                 return false;
             }
