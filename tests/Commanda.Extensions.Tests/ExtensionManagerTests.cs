@@ -4,6 +4,7 @@ using Commanda.Core;
 using Commanda.Extensions;
 using System.Composition;
 using System.Composition.Hosting;
+using System.Runtime.Versioning;
 
 namespace Commanda.Extensions.Tests;
 
@@ -14,6 +15,10 @@ public class TestMefExtension : IMcpExtension
     public string Name => "TestMefExtension";
     public string Version => "1.0.0";
     public IEnumerable<Type> ToolTypes => new[] { typeof(TestTool) };
+    public string? AssemblyPath => null;
+    public bool IsEnabled => true;
+    public DateTime InstalledAt => DateTime.UtcNow;
+    public DateTime? LastUsed => null;
 
     public Task InitializeAsync(IServiceProvider? services)
     {
@@ -28,6 +33,7 @@ public class TestTool
     // テスト用のツール実装
 }
 
+[SupportedOSPlatform("windows")]
 public class ExtensionManagerTests
 {
     private readonly ExtensionManager _extensionManager;

@@ -3,9 +3,11 @@ using Moq;
 using Commanda.Core;
 using Commanda.Mcp;
 using Commanda.Extensions;
+using System.Runtime.Versioning;
 
 namespace Commanda.Mcp.Tests;
 
+[SupportedOSPlatform("windows")]
 public class McpServerTests : IDisposable
 {
     private readonly Mock<IExtensionManager> _extensionManagerMock;

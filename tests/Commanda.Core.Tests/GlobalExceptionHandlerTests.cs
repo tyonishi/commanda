@@ -2,9 +2,11 @@ using Xunit;
 using Moq;
 using Microsoft.Extensions.Logging;
 using Commanda.Core;
+using System.Runtime.Versioning;
 
 namespace Commanda.Core.Tests;
 
+[SupportedOSPlatform("windows")]
 public class GlobalExceptionHandlerTests
 {
     private readonly Mock<ILogger<GlobalExceptionHandler>> _loggerMock;

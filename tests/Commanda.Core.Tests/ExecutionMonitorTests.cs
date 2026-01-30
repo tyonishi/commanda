@@ -2,9 +2,11 @@ using Xunit;
 using Moq;
 using Commanda.Core;
 using Microsoft.Extensions.Logging;
+using System.Runtime.Versioning;
 
 namespace Commanda.Core.Tests;
 
+[SupportedOSPlatform("windows")]
 public class ExecutionMonitorTests
 {
     private readonly Mock<ILogger<ExecutionMonitor>> _loggerMock;

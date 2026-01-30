@@ -1,9 +1,11 @@
 using Xunit;
 using Moq;
 using Commanda.Core;
+using System.Runtime.Versioning;
 
 namespace Commanda.Core.Tests;
 
+[SupportedOSPlatform("windows")]
 public class LmStudioProviderTests
 {
     private readonly Mock<SecureStorage> _secureStorageMock;

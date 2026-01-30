@@ -2,9 +2,12 @@ using Xunit;
 using Moq;
 using Commanda.Core;
 using System.ComponentModel;
+using System.Runtime.Versioning;
+using System.Linq;
 
 namespace Commanda.UI.Tests;
 
+[SupportedOSPlatform("windows")]
 public class HistoryViewModelTests
 {
     private readonly Mock<IRepository<ExecutionLog>> _repositoryMock;
@@ -220,7 +223,7 @@ public class HistoryViewModelTests
         _viewModel.StatusFilter = "Success";
 
         // Assert
-        Assert.Equal(2, _viewModel.FilteredLogs.Count);
+        Assert.Equal(2, _viewModel.FilteredLogs.Count());
         Assert.All(_viewModel.FilteredLogs, l => Assert.Equal("Success", l.Status));
     }
 
@@ -246,7 +249,7 @@ public class HistoryViewModelTests
         _viewModel.EndDate = now;
 
         // Assert
-        Assert.Equal(2, _viewModel.FilteredLogs.Count);
+        Assert.Equal(2, _viewModel.FilteredLogs.Count());
     }
 
     [Fact]

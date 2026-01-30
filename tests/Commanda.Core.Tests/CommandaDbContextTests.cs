@@ -4,9 +4,11 @@ using Microsoft.EntityFrameworkCore.InMemory;
 using Microsoft.EntityFrameworkCore.Sqlite;
 using Microsoft.Data.Sqlite;
 using Commanda.Core;
+using System.Runtime.Versioning;
 
 namespace Commanda.Core.Tests;
 
+[SupportedOSPlatform("windows")]
 public class CommandaDbContextTests : IDisposable
 {
     private readonly CommandaDbContext _context;

@@ -1,8 +1,10 @@
 using Xunit;
 using Commanda.Core;
+using System.Runtime.Versioning;
 
 namespace Commanda.Core.Tests;
 
+[SupportedOSPlatform("windows")]
 public class InputValidatorTests
 {
     private readonly InputValidator _validator;

@@ -2,9 +2,11 @@ using Xunit;
 using Moq;
 using Commanda.Core;
 using System.ComponentModel;
+using System.Runtime.Versioning;
 
 namespace Commanda.UI.Tests;
 
+[SupportedOSPlatform("windows")]
 public class SettingsViewModelTests
 {
     private readonly Mock<ILlmProviderManager> _llmManagerMock;

@@ -1,9 +1,11 @@
 using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
+using System.Runtime.Versioning;
 
 namespace Commanda.Core.Tests;
 
+[SupportedOSPlatform("windows")]
 public class AgentOrchestratorTests
 {
     private readonly Mock<ITaskPlanner> _taskPlannerMock;

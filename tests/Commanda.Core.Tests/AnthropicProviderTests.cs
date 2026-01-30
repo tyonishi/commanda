@@ -3,9 +3,11 @@ using Moq;
 using Commanda.Core;
 using System.Net;
 using System.Net.Http.Json;
+using System.Runtime.Versioning;
 
 namespace Commanda.Core.Tests;
 
+[SupportedOSPlatform("windows")]
 public class AnthropicProviderTests
 {
     private readonly Mock<SecureStorage> _secureStorageMock;

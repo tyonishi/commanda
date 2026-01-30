@@ -3,6 +3,7 @@ using Moq;
 using Xunit;
 using Commanda.Core;
 using System.Collections.ObjectModel;
+using System.Runtime.Versioning;
 using System.Threading.Tasks;
 
 namespace Commanda.Core.Tests;
@@ -10,6 +11,7 @@ namespace Commanda.Core.Tests;
 /// <summary>
 /// エージェント実行フローの統合テスト
 /// </summary>
+[SupportedOSPlatform("windows")]
 public class AgentExecutionIntegrationTests
 {
     private readonly Mock<ITaskPlanner> _taskPlannerMock;

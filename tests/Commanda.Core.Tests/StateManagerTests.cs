@@ -2,9 +2,11 @@ using Xunit;
 using Commanda.Core;
 using Moq;
 using Microsoft.Extensions.Logging;
+using System.Runtime.Versioning;
 
 namespace Commanda.Core.Tests;
 
+[SupportedOSPlatform("windows")]
 public class StateManagerTests : IDisposable
 {
     private readonly Mock<ILogger<StateManager>> _loggerMock;

@@ -1,10 +1,12 @@
 using Xunit;
 using Commanda.Core;
 using Commanda.Mcp;
+using System.Runtime.Versioning;
 
 namespace Commanda.Mcp.Tests;
 
 [Collection("MCP Tests")] // シリアル実行でリソース競合を防止
+[SupportedOSPlatform("windows")]
 public class ApplicationControlTests : IDisposable
 {
     private readonly List<string> _tempFiles = new();
