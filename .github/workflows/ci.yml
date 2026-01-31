@@ -22,8 +22,8 @@ jobs:
       # Critical decision: Use .NET 8.0 as specified in project configuration and AGENTS.md
 
     - name: Restore dependencies
-      run: dotnet restore Commanda.sln -r win-x64
-      # Critical decision: Restore all project dependencies for win-x64 to ensure RID-specific assets are generated
+      run: dotnet restore Commanda.sln
+      # Restore all project dependencies (RID-agnostic); RID is applied only at publish time
 
     - name: Check for vulnerable packages
       run: |
@@ -39,12 +39,12 @@ jobs:
       # Critical decision: Run vulnerability check on all main projects to identify security issues in dependencies; fail pipeline if vulnerabilities found
 
     - name: Build solution
-      run: dotnet build Commanda.sln --configuration Release -r win-x64 --no-restore
-      # Critical decision: Build in Release mode for production-ready binaries targeting win-x64; --no-restore skips redundant restore step
+      run: dotnet build Commanda.sln --configuration Release --no-restore
+      # Build in Release mode; RID is not required for solution-level build
 
     - name: Run tests
-      run: dotnet test Commanda.sln --configuration Release -r win-x64 --no-build --verbosity normal
-      # Critical decision: Execute all unit and integration tests with the same RID-specific build artifacts; --no-build reuses previous build artifacts
+      run: dotnet test Commanda.sln --configuration Release --no-build --verbosity normal
+      # Execute all unit and integration tests; RID is not required for tests
 
     - name: Basic application startup check
       run: |
